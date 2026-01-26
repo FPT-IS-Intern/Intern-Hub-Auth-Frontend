@@ -16,7 +16,7 @@ RUN npm run build --configuration=production
 FROM nginx:stable-alpine
 
 
-COPY --from=build-stage /app/dist/intern-hub-boPortal-frontend/browser /usr/share/nginx/html
+COPY --from=build-stage /app/dist/intern-hub-auth-frontend/browser /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
