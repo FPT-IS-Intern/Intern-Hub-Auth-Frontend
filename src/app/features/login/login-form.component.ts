@@ -4,15 +4,13 @@ import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../services/auth.service';
-import { InputFieldComponent } from '../components/input-file/input-field.component';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
 import { InputTextComponent } from "@goat-bravos/intern-hub-layout";
 
 @Component({
     selector: 'app-login-form',
     standalone: true,
-    // Thêm các component con vào đây
-    imports: [CommonModule, RouterLink, InputFieldComponent, ErrorMessageComponent, InputTextComponent],
+    imports: [CommonModule, RouterLink, ErrorMessageComponent, InputTextComponent],
     templateUrl: './login-form.component.html',
     styleUrls: ['./login-form.component.scss']
 })

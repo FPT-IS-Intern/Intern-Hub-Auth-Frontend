@@ -1,0 +1,133 @@
+// Biến màu sắc được sử dụng
+$primary-blue: #0083F0;
+$primary-orange: #d35400;
+$border-black: #000000;
+$bg-card: #FFFFFFCC;
+$text-color: #2A3034;
+$visible-bg: #E18308;
+$disabled-bg: #E9EDF1;
+$orange-hover: #f57c00;
+$disabled-text: #828F96;
+
+.otp-page {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .otp-container {
+        background-color: $bg-card;
+        width: 100%;
+        max-width: 426px;
+        padding: 36px 24px;
+        border-radius: 20px;
+        box-shadow: 0px 0px 27.3px 11px rgba(#FFC87F, 0.67);
+        text-align: center;
+
+        .title {
+            color: $primary-orange;
+            font-size: 24px;
+            line-height: 32px;
+            letter-spacing: -0.5px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .description {
+            color: $text-color;
+            font-size: 14px;
+            line-height: 20px;
+            margin-top: 36px;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 60px;
+
+            input {
+                width: 44px;
+                height: 44px;
+                border: none;
+                background: transparent;
+                text-align: center;
+                font-size: 24px;
+                outline: none;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+                caret-color: $primary-blue;
+                transition: all 0.2s ease-in-out;
+
+                &:focus {
+                    border-bottom: 2px solid $border-black;
+                    transform: scale(1.05);
+                    background-color: rgba(255, 255, 255, 0.3);
+                }
+
+                &:not(:placeholder-shown) {
+                    border-bottom: 2px solid $border-black;
+                }
+            }
+        }
+
+        .error-wrapper {
+            margin-bottom: 16px; // Khoảng cách cho thông báo lỗi
+        }
+
+        .countdown-text {
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 36px;
+            color: $text-color;
+
+            .timer {
+                display: inline-block;
+                width: 40px;
+                color: $primary-blue;
+            }
+
+            .resend-link {
+                color: $primary-blue;
+                text-decoration: underline;
+                cursor: pointer;
+                font-weight: bold;
+                margin-left: 4px;
+                transition: opacity 0.2s;
+
+                &:hover {
+                    opacity: 0.7;
+                }
+
+                &:active {
+                    transform: scale(0.95);
+                }
+            }
+        }
+
+        .btn-next {
+            padding: 8px 0;
+            height: 36px;
+            width: 100%;
+            border: none;
+            border-radius: 8px;
+            background: $visible-bg;
+            color: white;
+            font-weight: 500;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+
+            &:hover:not(:disabled) {
+                background: $orange-hover;
+            }
+
+            &:disabled {
+                background: $disabled-bg;
+                color: $disabled-text;
+                cursor: not-allowed;
+            }
+        }
+    }
+}

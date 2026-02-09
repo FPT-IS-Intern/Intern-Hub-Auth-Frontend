@@ -1,0 +1,44 @@
+<div class="otp-page">
+    <div class="otp-container">
+        <h2 class="title">Mã xác thực</h2>
+        <p class="description">
+            Vui lòng nhập mã kích hoạt được gửi đến Email <br> FPT của bạn
+        </p>
+
+        <div class="input-group">
+            @for (control of otpForm.controls; track $index) {
+            <input [id]="'otp-' + $index" type="text" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+                [formControl]="$any(control)" placeholder=" " (input)="onInput($event, $index)"
+                (keydown)="onKeyDown($event, $index)" (focus)="onFocus($event)" />
+            }
+        </div>
+
+        @if (error()) {
+        <div class="error-wrapper">
+            <app-error-message [message]="error()!"></app-error-message>
+        </div>
+        }
+
+        <div class="countdown-text">
+            @if (!isCanResend()) {
+            Gửi lại mã sau <span class="timer">({{ countdown() }}s)</span>
+            } @else {
+            <span class="resend-link" (click)="resendOtp()">Gửi lại mã kích hoạt</span>
+            }
+        </div>
+
+        <button class="btn-next" [disabled]="!otpForm.valid || isLoading()" (click)="handleSubmit()">
+            @if (isLoading()) {
+            <span>....Đang load</span>
+            } @else {
+            Tiếp theo
+            }
+        </button>
+    </div>
+</div>
+
+@if (popup().show) {
+<app-pop-up-confirm [title]="popup().title" [content]="popup().content" imgUrl="assets/warning-icon.svg"
+    colorButton="#ef4444" (confirmClick)="onConfirm()" (cancelClick)="closePopup()">
+</app-pop-up-confirm>
+}
