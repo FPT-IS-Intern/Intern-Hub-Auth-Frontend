@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -15,6 +15,9 @@ import { InputTextComponent } from "@goat-bravos/intern-hub-layout";
     styleUrls: ['./forgot-password.component.scss']
 })
 export class ForgotPasswordComponent {
+    private authService = inject(AuthService);
+    private router = inject(Router);
+    
     // State quản lý bằng signals
     personalId = signal('');
     email = signal('');
@@ -26,8 +29,6 @@ export class ForgotPasswordComponent {
         const id = this.personalId().trim();
         return id !== '' && id.length !== 12;
     });
-
-    constructor(private authService: AuthService, private router: Router) { }
 
     async handleSubmit() {
         if (this.checkInputRequired() || this.isIdInvalid()) {

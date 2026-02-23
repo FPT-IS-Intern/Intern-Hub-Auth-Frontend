@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormArray, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
@@ -14,6 +14,10 @@ import { AuthService } from '../../services/auth.service';
     styleUrls: ['./otp-input.component.scss']
 })
 export class OtpInputComponent implements OnInit, OnDestroy {
+
+    private authService = inject(AuthService);
+    private router = inject(Router);
+
     otpForm = new FormArray(Array(6).fill(0).map(() => new FormControl('', [Validators.required])));
     countdown = signal(3);
     isLoading = signal(false);
@@ -26,8 +30,6 @@ export class OtpInputComponent implements OnInit, OnDestroy {
         content: ''
     });
     isCanResend = computed(() => this.countdown() === 0);
-
-    constructor(private authService: AuthService, private router: Router) { }
 
     async handleSubmit() {
         if (!this.otpForm.valid || this.isCanResend()) {

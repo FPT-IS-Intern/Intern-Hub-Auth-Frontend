@@ -1,4 +1,4 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -15,6 +15,8 @@ import { InputTextComponent } from "@goat-bravos/intern-hub-layout";
     styleUrls: ['./login-form.component.scss']
 })
 export class LoginFormComponent {
+    private authService = inject(AuthService);
+
     // State quản lý bằng signals
     username = signal('');
     password = signal('');
@@ -23,8 +25,6 @@ export class LoginFormComponent {
 
     // Logic kiểm tra nút bấm
     checkInputRequired = computed(() => this.username().trim() === '' || this.password().trim() === '');
-
-    constructor(private authService: AuthService) { }
 
     async handleSubmit() {
         if (this.checkInputRequired()) return;
