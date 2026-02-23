@@ -1,13 +1,15 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { InputTextComponent } from '@goat-bravos/intern-hub-layout';
+import { ErrorMessageComponent } from '../components/error-message/error-message.component';
 // Giả định bạn có một service để đổi mật khẩu
 // import { AuthService } from '@services/auth.service'; 
 
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, InputTextComponent, ErrorMessageComponent],
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss']
 })
