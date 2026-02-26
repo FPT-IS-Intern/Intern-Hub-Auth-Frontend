@@ -2,9 +2,8 @@ import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { REST_CONFIG, RestConfig } from '@goat-bravos/shared-lib-client';
-import { environment } from '../environments/environment';
-
 import { routes } from './app.routes';
+import { getBaseUrl } from './core/config/app-config';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -13,7 +12,7 @@ export const appConfig: ApplicationConfig = {
     {
       provide: REST_CONFIG,
       useValue: {
-        apiBaseUrl: environment.apiUrl,
+        apiBaseUrl: getBaseUrl(),
         enableLogging: true,
         internalAutoRetry: true,
         retryAttempts: 3,
