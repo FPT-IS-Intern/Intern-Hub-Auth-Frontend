@@ -3,7 +3,7 @@ import { Observable } from 'rxjs';
 import { LoginRequest, LoginResponse, ForgotPassResponse } from '../models/login.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ResponseApi } from '@goat-bravos/shared-lib-client';
-import { environment } from '../../environments/environment';
+import { getBaseUrl } from '../core/config/app-config';
 
 @Injectable({
   providedIn: 'root',
@@ -18,11 +18,9 @@ export class AuthService {
       'X-Device-ID': this.getDeviceId(),
     });
 
-    return this.httpClient.post<ResponseApi<LoginResponse>>(
-      `${environment.apiUrl}/auth/login`,
-      data,
-      { headers },
-    );
+    return this.httpClient.post<ResponseApi<LoginResponse>>(`${getBaseUrl()}/auth/login`, data, {
+      headers,
+    });
   }
 
   forgotPassword(data: LoginRequest): Observable<ResponseApi<ForgotPassResponse>> {
@@ -33,7 +31,7 @@ export class AuthService {
     });
 
     return this.httpClient.post<ResponseApi<ForgotPassResponse>>(
-      `${environment.apiUrl}/auth/forgot-password`,
+      `${getBaseUrl()}/auth/forgot-password`,
       data,
       { headers },
     );
