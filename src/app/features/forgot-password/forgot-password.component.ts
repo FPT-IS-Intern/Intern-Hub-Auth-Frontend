@@ -1,6 +1,6 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../services/auth.service';
@@ -17,6 +17,7 @@ import { InputTextComponent } from "@goat-bravos/intern-hub-layout";
 export class ForgotPasswordComponent {
     private authService = inject(AuthService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
     
     // State quản lý bằng signals
     personalId = signal('');
@@ -40,7 +41,7 @@ export class ForgotPasswordComponent {
         this.isLoading.set(true);
 
         // khi xác thực thành công, chuyển hướng đến trang xác thực OTP
-        this.router.navigate(['/auth/verify-otp']);
+        this.router.navigate(['../verify-otp'], { relativeTo: this.route });
 
     }
 

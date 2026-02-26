@@ -1,26 +1,31 @@
 import { Routes } from '@angular/router';
 import { LoginFormComponent } from './features/login/login-form.component';
-import { ForgotPasswordComponent } from './features/forgot-password/forgot-password.component';
 
-export const routes: Routes = [
+const buildAuthRoutes = (): Routes => [
   {
     path: '',
     component: LoginFormComponent,
   },
   {
     path: 'forgot-password',
-    loadComponent: () => import('./features/forgot-password/forgot-password.component').then(m => m.ForgotPasswordComponent),
+    loadComponent: () =>
+      import('./features/forgot-password/forgot-password.component').then((m) => m.ForgotPasswordComponent),
   },
   {
     path: 'verify-otp',
-    loadComponent: () => import('./features/opt/otp-input.component').then(m => m.OtpInputComponent)
+    loadComponent: () => import('./features/opt/otp-input.component').then((m) => m.OtpInputComponent),
   },
   {
     path: 'change-password',
-    loadComponent: () => import('./features/change-password/change-password.component').then(m => m.ChangePasswordComponent)
-  }
-  // {
-  //   path: 'register',
-  //   loadComponent: () => import('./features/register/register.component').then(m => m.RegisterComponent)
-  // }
+    loadComponent: () =>
+      import('./features/change-password/change-password.component').then((m) => m.ChangePasswordComponent),
+  },
+];
+
+export const routes: Routes = [
+  ...buildAuthRoutes(),
+  {
+    path: '**',
+    redirectTo: '',
+  },
 ];

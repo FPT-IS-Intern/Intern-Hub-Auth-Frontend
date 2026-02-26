@@ -1,13 +1,13 @@
-// Biến màu sắc được sử dụng
-$primary-blue: #0083F0;
-$primary-orange: #d35400;
-$border-black: #000000;
-$bg-card: #FFFFFFCC;
-$text-color: #2A3034;
-$visible-bg: #E18308;
-$disabled-bg: #E9EDF1;
-$orange-hover: #f57c00;
-$disabled-text: #828F96;
+// Variables mapped to dynamic system
+$primary-blue: var(--brand-600);
+$primary-orange: var(--brand-500);
+$border-black: var(--neutral-color-900);
+$bg-card: var(--neutral-alpha-white);
+$text-color: var(--neutral-color-800);
+$visible-bg: var(--brand-500);
+$disabled-bg: var(--neutral-color-100);
+$orange-hover: var(--brand-400);
+$disabled-text: var(--neutral-color-400);
 
 .otp-page {
     position: fixed;
@@ -22,7 +22,7 @@ $disabled-text: #828F96;
         max-width: 426px;
         padding: 36px 24px;
         border-radius: 20px;
-        box-shadow: 0px 0px 27.3px 11px rgba(#FFC87F, 0.67);
+        box-shadow: 0px 0px 27.3px 11px rgba(var(--brand-200-rgb), 0.67);
         text-align: center;
 
         .title {

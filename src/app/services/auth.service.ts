@@ -1,60 +1,46 @@
 import { Injectable } from '@angular/core';
-import { Observable, of, delay } from 'rxjs';
-import { ForgotPassResponse, LoginRequest, LoginResponse } from '../models/login.model';
+import { Observable } from 'rxjs';
+import { LoginRequest, LoginResponse, ForgotPassResponse } from '../models/login.model';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { ResponseApi } from '@goat-bravos/shared-lib-client';
+
+const API_BASE = 'https://internhub-v2.bbtech.io.vn/api';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  // Giả lập database nhỏ
-  private readonly MOCK_USER = {
-    username: 'admin@gmail.com',
-    password: '123'
-  };
 
-  login(data: LoginRequest): Observable<LoginResponse> {
-    console.log('Đang kết nối tới API giả lập...', data);
+  constructor(private readonly httpClient: HttpClient) {}
 
-    let response: LoginResponse;
+  login(data: LoginRequest): Observable<ResponseApi<LoginResponse>> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': '*/*',
+      'X-Device-ID': this.getDeviceId()
+    });
 
-    // Logic kiểm tra giả lập
-    if (data.username === this.MOCK_USER.username && data.password === this.MOCK_USER.password) {
-      response = {
-        success: true,
-        message: 'Đăng nhập thành công!',
-        // Thêm token giả nếu cần
-      };
-    } else {
-      response = {
-        success: false,
-        message: 'Sai tên đăng nhập hoặc mật khẩu',
-      };
-    }
-
-    // Trả về Observable kèm delay 1.5 giây cho giống thật
-    return of(response).pipe(delay(500));
+    return this.httpClient
+      .post<ResponseApi<LoginResponse>>(`${API_BASE}/auth/login`, data, { headers });
   }
 
-   forgotPassword(data: LoginRequest): Observable<ForgotPassResponse> {
-    console.log('Đang kết nối tới API giả lập...', data);
+  forgotPassword(data: LoginRequest): Observable<ResponseApi<ForgotPassResponse>> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': '*/*',
+      'X-Device-ID': this.getDeviceId()
+    });
 
-    let response: ForgotPassResponse;
+    return this.httpClient
+      .post<ResponseApi<ForgotPassResponse>>(`${API_BASE}/auth/forgot-password`, data, { headers });
+  }
 
-    // Logic kiểm tra giả lập
-    if (data.username === this.MOCK_USER.username && data.password === this.MOCK_USER.password) {
-      response = {
-        success: true,
-        message: 'Yêu cầu đặt lại mật khẩu đã được gửi!',
-        // Thêm token giả nếu cần
-      };
-    } else {
-      response = {
-        success: false,
-        message: 'Sai Email tài khoản hoặc CCCD/CMND',
-      };
+  private getDeviceId(): string {
+    let deviceId = localStorage.getItem('X-Device-ID');
+    if (!deviceId) {
+      deviceId = crypto.randomUUID();
+      localStorage.setItem('X-Device-ID', deviceId);
     }
-
-    // Trả về Observable kèm delay 1.5 giây cho giống thật
-    return of(response).pipe(delay(500));
+    return deviceId;
   }
 }

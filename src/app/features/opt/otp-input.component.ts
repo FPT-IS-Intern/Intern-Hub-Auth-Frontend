@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormArray, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
 import { PopUpConfirmComponent } from '@goat-bravos/intern-hub-layout';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -17,6 +17,7 @@ export class OtpInputComponent implements OnInit, OnDestroy {
 
     private authService = inject(AuthService);
     private router = inject(Router);
+    private route = inject(ActivatedRoute);
 
     otpForm = new FormArray(Array(6).fill(0).map(() => new FormControl('', [Validators.required])));
     countdown = signal(3);
@@ -55,7 +56,7 @@ export class OtpInputComponent implements OnInit, OnDestroy {
             }
 
             // Nếu thành công, chuyển hướng đến chức năng đặt lại mật khẩu
-            this.router.navigate(['/auth/change-password']);
+            this.router.navigate(['../change-password'], { relativeTo: this.route });
         } catch (err) {
             this.error.set('Có lỗi xảy ra, vui lòng thử lại');
         } finally {

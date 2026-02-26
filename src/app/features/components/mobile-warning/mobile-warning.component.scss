@@ -1,0 +1,50 @@
+// Variables mapped to dynamic system
+$bg-white: var(--neutral-color-10);
+$text-main: var(--neutral-color-800);
+$text-gray: var(--neutral-color-500);
+
+.mobile-warning {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background-color: $bg-white;
+  padding: 24px;
+  justify-content: center;
+  align-items: center;
+}
+
+.mobile-warning-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  max-width: 320px;
+
+  img {
+    width: 180px;
+    height: auto;
+  }
+
+  h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: $text-main;
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  p {
+    font-size: 14px;
+    color: $text-gray;
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+@media (max-width: 500px) {
+  .mobile-warning {
+    display: flex !important;
+  }
+}

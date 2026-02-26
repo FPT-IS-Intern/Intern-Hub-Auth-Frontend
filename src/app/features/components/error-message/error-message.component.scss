@@ -1,6 +1,7 @@
-$red-50: #FEEEED;
-$red-200: #F2685B;
-$red-700: #5F0500;
+// Variables mapped to dynamic system
+$red-50: var(--semantic-error-50);
+$red-200: var(--semantic-error-200);
+$red-700: var(--semantic-error-700);
 
 .error-container {
   display: flex;
