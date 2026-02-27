@@ -173,6 +173,10 @@ $disabled-text: var(--neutral-color-400);
       }
     }
 
+    .error-wrapper {
+      margin: 8px 0;
+    }
+
     .btn-login {
       margin-top: 12px;
       height: 48px;

@@ -189,12 +189,7 @@ export class RegisterPage {
       },
       error: (error: Error) => {
         this.isLoading = false;
-        if (error.message.toLowerCase().includes('conflict')) {
-          this.errorMessage =
-            'Email, số CCCD hoặc số điện thoại này đã được đăng ký. Vui lòng kiểm tra lại thông tin.';
-        } else {
-          this.errorMessage = error.message || 'Đăng ký thất bại. Vui lòng thử lại.';
-        }
+        this.errorMessage = error.message || 'Đăng ký thất bại. Vui lòng thử lại.';
         this.changeDetectorRef.detectChanges();
       },
     });
