@@ -10,19 +10,23 @@ $orange-hover: var(--brand-400);
 $disabled-text: var(--neutral-color-400);
 
 .otp-page {
-    position: fixed;
-    inset: 0;
+    width: 100%;
+    min-height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 20px 0;
 
     .otp-container {
         background-color: $bg-card;
         width: 100%;
         max-width: 426px;
         padding: 36px 24px;
+        border: 1px solid rgba(255, 255, 255, 0.72);
         border-radius: 20px;
-        box-shadow: 0px 0px 27.3px 11px rgba(var(--brand-200-rgb), 0.67);
+        box-shadow:
+            0px 0px 27.3px 11px rgba(var(--brand-200-rgb), 0.42),
+            0 18px 40px rgba(10, 31, 68, 0.08);
         text-align: center;
 
         .title {

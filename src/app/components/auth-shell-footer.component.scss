@@ -1,0 +1,58 @@
+.auth-shell__footer {
+  padding: 40px 32px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+  color: var(--neutral-color-700);
+}
+
+.auth-shell__footer-content {
+  max-width: 1120px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+  text-align: center;
+}
+
+.auth-shell__slogan-wrapper {
+  margin-bottom: 8px;
+}
+
+.auth-shell__slogan {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #e18308, #006bdf);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-transform: uppercase;
+}
+
+.auth-shell__slogan-vi {
+  margin: 4px 0 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--neutral-color-500);
+  letter-spacing: 1px;
+}
+
+.auth-shell__meta {
+  max-width: 700px;
+  line-height: 1.6;
+  font-size: 14px;
+  color: var(--neutral-color-600);
+}
+
+@media (max-width: 768px) {
+  .auth-shell__footer {
+    padding: 32px 20px;
+  }
+
+  .auth-shell__slogan {
+    font-size: 20px;
+  }
+}

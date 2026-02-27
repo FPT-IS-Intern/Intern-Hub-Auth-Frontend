@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(circle at top left, rgba(255, 211, 153, 0.75), transparent 34%),
+    radial-gradient(circle at bottom right, rgba(0, 107, 223, 0.14), transparent 30%),
+    linear-gradient(180deg, #fffaf4 0%, #fff 48%, #f8fbff 100%);
+  color: var(--neutral-color-800);
+}
+
+.auth-shell__content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 20px 28px;
+}
+
+.auth-shell__viewport {
+  width: 100%;
+  max-width: 1120px;
+}
+
+@media (max-width: 768px) {
+  .auth-shell__content {
+    padding: 4px 12px 20px;
+  }
+}

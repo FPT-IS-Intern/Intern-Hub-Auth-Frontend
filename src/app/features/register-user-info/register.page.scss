@@ -1,0 +1,247 @@
+.process-step-wrapper {
+  max-width: 647px;
+  margin: 0 auto 24px;
+  padding: 0 24px;
+}
+
+.register-container {
+  max-width: 647px;
+  margin: 40px auto;
+  padding: 32px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+}
+
+.back-navigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 8px 16px;
+  margin-bottom: 24px;
+  border-radius: 12px;
+  color: var(--neutral-color-500);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: transparent;
+  border: 1px solid transparent;
+
+  i {
+    font-size: 18px;
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    color: var(--brand-500);
+    background: rgba(var(--brand-500-rgb, 225, 131, 8), 0.06);
+    border-color: rgba(var(--brand-500-rgb, 225, 131, 8), 0.2);
+
+    i {
+      transform: translateX(-4px);
+    }
+  }
+}
+
+.process-step-wrapper {
+  margin-bottom: 32px;
+}
+
+.register-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--brand-500);
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.form-section {
+  margin-bottom: 24px;
+  width: 100%;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-row-full {
+  grid-column: 1 / -1;
+}
+
+.form-group {
+  margin-bottom: 16px;
+}
+
+.error-message {
+  display: block;
+  color: var(--utility-500, #e63946);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.button-section {
+  margin-top: 32px;
+}
+
+.step-buttons,
+.step2-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.message-section {
+  margin-top: 16px;
+  margin-bottom: 16px;
+}
+
+.error-message.api-error {
+  font-size: 14px;
+  padding: 12px 16px;
+  background-color: rgba(230, 57, 70, 0.1);
+  border: 1px solid var(--utility-500, #e63946);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.terms-section {
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.terms-checkbox {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.terms-checkbox input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  accent-color: var(--brand-500);
+  cursor: pointer;
+}
+
+.terms-text {
+  font-size: 14px;
+  color: var(--neutral-700, #4a5568);
+  line-height: 1.5;
+}
+
+.terms-link {
+  color: var(--brand-500);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
+.success-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+}
+
+.date-picker-field,
+.readonly-file-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.date-picker-label,
+.readonly-file-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--neutral-700, #4a5568);
+}
+
+.success-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 48px 40px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--neutral-200, #e9edf1);
+  min-width: 360px;
+}
+
+.success-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--neutral-900, #1a1a1a);
+  text-align: center;
+  margin: 0;
+}
+
+.success-button {
+  margin-top: 8px;
+}
+
+.required-star {
+  color: var(--utility-500, #e63946);
+}
+
+.readonly-file-value,
+.readonly-file-preview {
+  padding: 10px 12px;
+  background: var(--neutral-50, #f9fafb);
+  border: 1px solid var(--neutral-200, #e9edf1);
+  border-radius: 8px;
+}
+
+.readonly-file-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-name {
+  font-size: 14px;
+  color: var(--neutral-700, #4a5568);
+}
+
+.avatar-preview-img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid var(--neutral-200, #e9edf1);
+}
+
+.cv-icon {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--brand-500);
+}
+
+@media (max-width: 640px) {
+  .register-container {
+    margin: 20px 16px;
+    padding: 24px 16px;
+  }
+
+  .form-row,
+  .step2-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  .success-card {
+    min-width: unset;
+    width: 100%;
+  }
+}

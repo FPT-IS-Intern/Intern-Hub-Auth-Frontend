@@ -1,0 +1,20 @@
+<div class="process-step-wrapper">
+  <div class="process-step-container">
+    @for (step of steps; track step.stepNumber; let i = $index) {
+      @if (i > 0) {
+        <div class="step-connector" [class.completed]="currentStep > step.stepNumber - 1"></div>
+      }
+      <div
+        class="step-item"
+        [class.active]="currentStep === step.stepNumber"
+        [class.completed]="currentStep > step.stepNumber"
+      >
+        <div class="step-oval">
+          {{ step.stepNumber }}
+        </div>
+        <span class="step-label">{{ step.label }}</span>
+      </div>
+    }
+  </div>
+  <div class="step-divider"></div>
+</div>

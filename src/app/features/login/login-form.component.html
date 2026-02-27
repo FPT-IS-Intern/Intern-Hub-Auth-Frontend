@@ -1,52 +1,82 @@
 <app-mobile-warning />
 <div class="login-page">
-  <div class="login-card">
-    <h1 class="title">Đăng nhập</h1>
-
-    <form (submit)="$event.preventDefault(); handleSubmit()" class="form-container">
-      <div class="group-input">
-        <app-input-text
-          headerInput="Tên đăng nhập"
-          placeholder="Nhập tên đăng nhập"
-          [required]="true"
-          [(value)]="username"
-        ></app-input-text>
-
-        <app-input-text
-          headerInput="Mật khẩu"
-          placeholder="Nhập mật khẩu"
-          typeInput="password"
-          [required]="true"
-          icon="dsi-eye-line"
-          (iconClick)="togglePassword()"
-          [(value)]="password"
-        ></app-input-text>
-      </div>
-
-      @if (error()) {
-        <div class="error-wrapper">
-          <app-error-message [message]="error()!"></app-error-message>
+  <div class="login-container">
+    <!-- Phía bên trái: Giới thiệu -->
+    <div class="login-intro">
+      <div class="login-intro__content">
+        <h2 class="login-intro__title">Co-Create the Next</h2>
+        <p class="login-intro__subtitle">Cùng kiến tạo tương lai số</p>
+        <div class="login-intro__features">
+          <div class="feature-item">
+            <span>Dấn thân vào môi trường làm việc năng động, trẻ trung và đầy cảm hứng.</span>
+          </div>
+          <div class="feature-item">
+            <span
+              >Bứt phá giới hạn, nâng tầm kỹ năng thực chiến cùng đội ngũ chuyên gia hàng đầu.</span
+            >
+          </div>
+          <div class="feature-item">
+            <span
+              >Kết nối cơ hội sự nghiệp không giới hạn trong lòng hệ sinh thái công nghệ FPT.</span
+            >
+          </div>
         </div>
-      }
+      </div>
+      <div class="login-intro__decoration"></div>
+    </div>
 
-      <button type="submit" class="btn-login" [disabled]="checkInputRequired() || isLoading()">
-        @if (isLoading()) {
-          <span class="loading-state">
-            <i class="fas fa-spinner fa-spin"></i>
-            Đang xử lý...
-          </span>
-        } @else {
-          Đăng nhập
+    <!-- Phía bên phải: Form đăng nhập -->
+    <div class="login-card">
+      <h1 class="title">Đăng nhập</h1>
+      <p class="card-subtitle">Chào mừng bạn quay trở lại với Intern Hub</p>
+
+      <form (submit)="$event.preventDefault(); handleSubmit()" class="form-container">
+        <div class="group-input">
+          <app-input-text
+            headerInput="Tên đăng nhập"
+            placeholder="Nhập tên đăng nhập"
+            [required]="true"
+            [(value)]="username"
+          ></app-input-text>
+
+          <app-input-text
+            headerInput="Mật khẩu"
+            placeholder="Nhập mật khẩu"
+            typeInput="password"
+            [required]="true"
+            icon="dsi-eye-line"
+            (iconClick)="togglePassword()"
+            [(value)]="password"
+          ></app-input-text>
+        </div>
+
+        @if (error()) {
+          <div class="error-wrapper">
+            <app-error-message [message]="error()!"></app-error-message>
+          </div>
         }
-      </button>
-    </form>
 
-    <div class="footer">
-      <a routerLink="forgot-password" class="link">Quên mật khẩu?</a>
-      <p class="register-text">
-        Chưa có tài khoản?
-        <a routerLink="/register" class="link">Đăng kí</a>
-      </p>
+        <button type="submit" class="btn-login" [disabled]="checkInputRequired() || isLoading()">
+          @if (isLoading()) {
+            <span class="loading-state">
+              <i class="fas fa-spinner fa-spin"></i>
+              Đang xử lý...
+            </span>
+          } @else {
+            Đăng nhập
+          }
+        </button>
+      </form>
+
+      <div class="divider"></div>
+
+      <div class="footer">
+        <a routerLink="/auth/forgot-password" class="link">Quên mật khẩu?</a>
+        <p class="register-text">
+          Chưa có tài khoản?
+          <a routerLink="/auth/register" class="link">Đăng kí</a>
+        </p>
+      </div>
     </div>
   </div>
 </div>

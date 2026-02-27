@@ -1,0 +1,46 @@
+.auth-shell__header {
+  position: relative;
+  z-index: 10;
+  padding: 16px 40px;
+  background: rgba(255, 255, 255, 0.4);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+}
+
+.auth-shell__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.auth-shell__logo {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+}
+
+.auth-shell__name {
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #e18308, #006bdf);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@media (max-width: 768px) {
+  .auth-shell__header {
+    padding: 12px 20px;
+  }
+
+  .auth-shell__logo {
+    height: 32px;
+  }
+
+  .auth-shell__name {
+    font-size: 18px;
+  }
+}
