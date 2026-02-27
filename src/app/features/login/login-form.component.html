@@ -1,43 +1,52 @@
 <app-mobile-warning />
 <div class="login-page">
-    <div class="login-card">
-        <h1 class="title">Đăng nhập</h1>
+  <div class="login-card">
+    <h1 class="title">Đăng nhập</h1>
 
-        <form (submit)="$event.preventDefault(); handleSubmit()" class="form-container">
-            <div class="group-input">
-                <app-input-text headerInput="Tên đăng nhập" placeholder="Nhập tên đăng nhập" [required]="true"
-                    [(value)]="username"></app-input-text>
+    <form (submit)="$event.preventDefault(); handleSubmit()" class="form-container">
+      <div class="group-input">
+        <app-input-text
+          headerInput="Tên đăng nhập"
+          placeholder="Nhập tên đăng nhập"
+          [required]="true"
+          [(value)]="username"
+        ></app-input-text>
 
-                <app-input-text headerInput="Mật khẩu" placeholder="Nhập mật khẩu" typeInput="password" 
-                    [required]="true"
-                    icon="dsi-eye-line" (iconClick)="togglePassword()" [(value)]="password"></app-input-text>
-            </div>
+        <app-input-text
+          headerInput="Mật khẩu"
+          placeholder="Nhập mật khẩu"
+          typeInput="password"
+          [required]="true"
+          icon="dsi-eye-line"
+          (iconClick)="togglePassword()"
+          [(value)]="password"
+        ></app-input-text>
+      </div>
 
-            @if (error()) {
-            <div class="error-wrapper">
-                <app-error-message [message]="error()!"></app-error-message>
-            </div>
-            }
-
-            <button type="submit" class="btn-login" [disabled]="checkInputRequired() || isLoading()">
-
-                @if (isLoading()) {
-                <span class="loading-state">
-                    <i class="fas fa-spinner fa-spin"></i>
-                    Đang xử lý...
-                </span>
-                } @else {
-                Đăng nhập
-                }
-            </button>
-        </form>
-
-        <div class="footer">
-            <a routerLink="forgot-password" class="link">Quên mật khẩu?</a>
-            <p class="register-text">
-                Chưa có tài khoản?
-                <a routerLink="/register" class="link">Đăng kí</a>
-            </p>
+      @if (error()) {
+        <div class="error-wrapper">
+          <app-error-message [message]="error()!"></app-error-message>
         </div>
+      }
+
+      <button type="submit" class="btn-login" [disabled]="checkInputRequired() || isLoading()">
+        @if (isLoading()) {
+          <span class="loading-state">
+            <i class="fas fa-spinner fa-spin"></i>
+            Đang xử lý...
+          </span>
+        } @else {
+          Đăng nhập
+        }
+      </button>
+    </form>
+
+    <div class="footer">
+      <a routerLink="forgot-password" class="link">Quên mật khẩu?</a>
+      <p class="register-text">
+        Chưa có tài khoản?
+        <a routerLink="/register" class="link">Đăng kí</a>
+      </p>
     </div>
+  </div>
 </div>
