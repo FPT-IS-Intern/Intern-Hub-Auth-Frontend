@@ -23,9 +23,14 @@ const buildAuthRoutes = (): Routes => [
 ];
 
 export const routes: Routes = [
-  ...buildAuthRoutes(),
   {
-    path: '**',
-    redirectTo: '',
+    path: '',
+    children: [
+      ...buildAuthRoutes(),
+      {
+        path: '**',
+        redirectTo: '',
+      },
+    ],
   },
 ];
