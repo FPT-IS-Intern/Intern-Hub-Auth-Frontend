@@ -91,7 +91,9 @@
           },
           "defaultConfiguration": "development",
           "options": {
-            "port": 4201
+            "port": 4201,
+            "hmr": true,
+            "liveReload": true
           }
         }
       }
