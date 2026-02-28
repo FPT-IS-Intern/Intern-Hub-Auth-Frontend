@@ -1,0 +1,99 @@
+<app-header-component [data]="headerData"></app-header-component>
+
+<div class="layout">
+
+  <app-sidebar [data]="sidebarData"></app-sidebar>
+
+  <div class="terms-container">
+
+    <h1>ĐIỀU KHOẢN SỬ DỤNG</h1>
+
+    <div class="terms-content">
+
+      <p>
+        Chào mừng bạn đến với Intern Hub. Bằng việc truy cập và sử dụng hệ thống,
+        bạn đồng ý tuân thủ toàn bộ điều khoản dưới đây.
+      </p>
+
+      <h3>1. Phạm vi áp dụng</h3>
+      <p>
+        Điều khoản này áp dụng cho tất cả người dùng bao gồm sinh viên, giảng viên,
+        doanh nghiệp và quản trị viên khi sử dụng nền tảng Intern Hub.
+      </p>
+
+      <h3>2. Tài khoản người dùng</h3>
+      <ul>
+        <li>Bạn chịu trách nhiệm bảo mật thông tin đăng nhập.</li>
+        <li>Không được chia sẻ tài khoản cho bên thứ ba.</li>
+        <li>Mọi hoạt động phát sinh từ tài khoản thuộc trách nhiệm của bạn.</li>
+      </ul>
+
+      <h3>3. Quyền và nghĩa vụ</h3>
+      <p>Người dùng cam kết:</p>
+
+      <ul>
+        <li>Cung cấp thông tin chính xác.</li>
+        <li>Không sử dụng hệ thống cho mục đích trái pháp luật.</li>
+        <li>Không phá hoại hoặc can thiệp vào hệ thống.</li>
+      </ul>
+
+      <h3>4. Thu thập dữ liệu</h3>
+      <p>
+        Intern Hub có thể thu thập các dữ liệu cơ bản như email, IP, lịch sử truy cập
+        nhằm phục vụ chức năng check-in, check-out và cải thiện dịch vụ.
+      </p>
+
+      <h3>5. Quyền sở hữu</h3>
+      <p>
+        Mọi nội dung, giao diện và mã nguồn thuộc quyền sở hữu của Intern Hub.
+        Nghiêm cấm sao chép khi chưa được cho phép.
+      </p>
+
+      <h3>6. Giới hạn trách nhiệm</h3>
+      <p>
+        Intern Hub không chịu trách nhiệm với các thiệt hại phát sinh do người dùng
+        vi phạm điều khoản hoặc sự cố ngoài tầm kiểm soát.
+      </p>
+
+      <h3>7. Thay đổi điều khoản</h3>
+      <p>
+        Điều khoản có thể được cập nhật bất kỳ lúc nào. Người dùng có trách nhiệm
+        theo dõi các thay đổi.
+      </p>
+
+      <h3>8. Hiệu lực</h3>
+      <p>
+        Điều khoản này có hiệu lực kể từ ngày bạn bắt đầu sử dụng hệ thống.
+      </p>
+
+    </div>
+
+    <div class="agree-box">
+
+      <label>
+        <input type="checkbox" [(ngModel)]="accepted" />
+        Tôi đã đọc và đồng ý với điều khoản sử dụng
+      </label>
+
+    </div>
+
+    <app-button-container
+      content="Tiếp tục"
+      size="md"
+      backgroundColor="var(--brand-500)"
+      (buttonClick)="continue()">
+    </app-button-container>
+
+  </div>
+
+</div>
+
+@if(showConfirm){
+  <app-pop-up-confirm
+    title="Chưa đồng ý điều khoản"
+    content="Bạn phải đồng ý điều khoản để tiếp tục sử dụng hệ thống."
+    colorButton="#ef4444"
+    (confirmClick)="showConfirm=false"
+    (cancelClick)="showConfirm=false">
+  </app-pop-up-confirm>
+}

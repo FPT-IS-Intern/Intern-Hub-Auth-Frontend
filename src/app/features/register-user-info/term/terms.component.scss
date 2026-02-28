@@ -1,0 +1,26 @@
+.layout {
+  display: flex;
+  height: 100vh;
+}
+
+.terms-container {
+  flex: 1;
+  padding: 32px;
+  overflow: auto;
+}
+
+h1 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.terms-svg {
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 24px;
+}
+
+.agree-box {
+  margin: 16px 0;
+}

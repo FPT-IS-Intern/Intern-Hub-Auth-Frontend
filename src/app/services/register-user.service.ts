@@ -6,6 +6,11 @@ import { ResponseApi } from '@goat-bravos/shared-lib-client';
 import { getBaseUrl } from '../core/config/app-config';
 import { RegisteredUserResponse, RegisterUserRequest } from '../models/register.model';
 
+export interface PositionResponse {
+  name: string;
+  positionId: number;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -13,6 +18,8 @@ export class RegisterUserService {
   private readonly baseUrl = `${getBaseUrl()}/hrm/users`;
 
   constructor(private readonly httpClient: HttpClient) {}
+
+  
 
   registerUser(
     userInfo: RegisterUserRequest,
@@ -53,5 +60,16 @@ export class RegisterUserService {
     }
 
     return throwError(() => new Error(errorMessage));
+  }
+
+  getPositions(): Observable<ResponseApi<PositionResponse[]>> {
+    return this.httpClient.get<ResponseApi<PositionResponse[]>>(`${this.baseUrl}/positions`).pipe(
+      catchError((error) => {
+        console.warn('Retrying positions with fallback URL...');
+        return this.httpClient.get<ResponseApi<PositionResponse[]>>(`${this.baseUrl}/positions`).pipe(
+          catchError(() => this.handleError(error))
+        );
+      })
+    );
   }
 }
