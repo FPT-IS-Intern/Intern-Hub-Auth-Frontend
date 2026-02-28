@@ -40,13 +40,19 @@
 
       <!-- BIRTH DATE -->
       <div class="form-group">
-        <app-input-text headerInput="Ngày sinh" [(value)]="birthDateStr" (valueChange)="onBirthDateInput($event)"
-          (keydown)="onlyDateInput($event)" placeholder="DD/MM/YYYY">
-        </app-input-text>
-
-        <span class="error-message" *ngIf="errors['birthDate']">
-          {{ errors['birthDate'] }}
-        </span>
+        <div class="date-picker-field">
+          <span class="date-picker-label">Ngày sinh <span class="required-star">*</span></span>
+          <app-date-picker
+            placeholder="DD/MM/YYYY"
+            [size]="'default'"
+            [(ngModel)]="birthDate"
+            (keydown)="onlyDateInput($event)"
+            (dateChange)="onBirthDateChange($event)">
+          </app-date-picker>
+        </div>
+        @if (errors['birthDate']) {
+          <span class="error-message">{{ errors['birthDate'] }}</span>
+        }
       </div>
 
       <div class="form-group form-row-full">
@@ -71,10 +77,16 @@
         <div class="select-field">
           <span class="select-label">Vị trí <span class="required-star">*</span></span>
           <select class="custom-select" [(ngModel)]="positionCode" (ngModelChange)="onPositionSelect($event)">
-            <option value="" disabled selected>Chọn vai trò của bạn</option>
-            @for (pos of positions; track pos.positionId) {
-            <option [value]="pos.name">{{ pos.name }}</option>
-            }
+
+            <option value="" disabled>Chọn vai trò của bạn</option>
+
+            <option value="BA">BA</option>
+            <option value="TES">TES</option>
+            <option value="PM">PM</option>
+            <option value="INTERN DEV">INTERN DEV</option>
+            <option value="DEV">DEV</option>
+            <option value="DESIGNER">DESIGNER</option>
+
           </select>
         </div>
         @if (errors['positionCode']) {

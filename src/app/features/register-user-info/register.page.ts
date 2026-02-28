@@ -350,11 +350,29 @@ export class RegisterPage {
   loadPositions(): void {
     this.registerUserService.getPositions().subscribe({
       next: (response) => {
-        this.positions = response.data || [];
+        if (!response?.data || response.data.length === 0) {
+          this.positions = [
+            { name: 'BA', positionId: 2 },
+            { name: 'TES', positionId: 9 },
+            { name: 'PM', positionId: 4 },
+            { name: 'INTERN DEV', positionId: 5 },
+            { name: 'DEV', positionId: 10 },
+            { name: 'DESIGNER', positionId: 1 }
+          ];
+        } else {
+          this.positions = response.data;
+        }
         this.changeDetectorRef.detectChanges();
       },
-      error: (error) => {
-        console.error('Failed to load positions', error);
+      error: () => {
+        this.positions = [
+          { name: 'BA', positionId: 2 },
+          { name: 'TES', positionId: 9 },
+          { name: 'PM', positionId: 4 },
+          { name: 'INTERN DEV', positionId: 5 },
+          { name: 'DEV', positionId: 10 },
+          { name: 'DESIGNER', positionId: 1 }
+        ];
       }
     });
   }

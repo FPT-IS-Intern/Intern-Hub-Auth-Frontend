@@ -59,6 +59,12 @@
   margin-bottom: 32px;
 }
 
+.date-picker-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .select-field {
   display: flex;
   flex-direction: column;
