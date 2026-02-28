@@ -19,8 +19,6 @@ export class RegisterUserService {
 
   constructor(private readonly httpClient: HttpClient) {}
 
-  
-
   registerUser(
     userInfo: RegisterUserRequest,
     avatarFile: File,

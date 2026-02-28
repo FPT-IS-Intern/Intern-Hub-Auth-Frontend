@@ -36,9 +36,13 @@ export class RegisterPage {
   private readonly registerUserService = inject(RegisterUserService);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
-  private readonly cdr = inject(ChangeDetectorRef);
 
   positions: PositionResponse[] = [];
+
+  ngOnInit() {
+    this.loadPositions();
+  }
+
 
   steps: ProcessStep[] = [
     { stepNumber: 1, label: 'Thông tin cá nhân' },
@@ -347,7 +351,7 @@ export class RegisterPage {
     this.registerUserService.getPositions().subscribe({
       next: (response) => {
         this.positions = response.data || [];
-        this.cdr.detectChanges();
+        this.changeDetectorRef.detectChanges();
       },
       error: (error) => {
         console.error('Failed to load positions', error);
