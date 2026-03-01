@@ -43,8 +43,8 @@ export class RegisterUserService {
 
     if (error.error instanceof ErrorEvent) {
       errorMessage = `Lỗi: ${error.error.message}`;
-    } else if (error.error?.status?.message) {
-      errorMessage = error.error.status.message;
+    } else if (error.error?.status?.code) {
+      errorMessage = error.error.status.code;
     } else if (error.error?.message) {
       errorMessage = error.error.message;
     } else if (error.status === 0) {
