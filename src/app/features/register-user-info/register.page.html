@@ -77,16 +77,8 @@
         <div class="select-field">
           <span class="select-label">Vị trí <span class="required-star">*</span></span>
           <select class="custom-select" [(ngModel)]="positionCode" (ngModelChange)="onPositionSelect($event)">
-
             <option value="" disabled>Chọn vai trò của bạn</option>
-
-            <option value="BA">BA</option>
-            <option value="TES">TES</option>
-            <option value="PM">PM</option>
-            <option value="INTERN DEV">INTERN DEV</option>
-            <option value="DEV">DEV</option>
-            <option value="DESIGNER">DESIGNER</option>
-
+            <option *ngFor="let pos of positions" [value]="pos.name">{{ pos.name }}</option>
           </select>
         </div>
         @if (errors['positionCode']) {
