@@ -125,6 +125,8 @@
 
 .form-group {
   margin-bottom: 16px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .error-message {
@@ -195,6 +197,30 @@
   text-decoration: underline;
 }
 
+.next-btn-wrapper {
+  &.disabled {
+    cursor: not-allowed;
+
+    // Block all clicks on children but keep cursor visible
+    > * {
+      pointer-events: none;
+    }
+  }
+}
+
+.next-btn ::ng-deep button {
+  background-color: var(--brand-500);
+  color: #fff;
+  transition: background-color 0.2s, color 0.2s, opacity 0.2s;
+}
+
+.next-btn--disabled ::ng-deep button {
+  background-color: var(--neutral-color-200) !important;
+  color: var(--neutral-color-400) !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .success-section {
   display: flex;
   justify-content: center;
@@ -257,11 +283,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+  max-width: 100%;
 }
 
 .file-name {
   font-size: 14px;
   color: var(--neutral-700, #4a5568);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  display: block;
+  max-width: 100%;
 }
 
 .avatar-preview-img {
@@ -276,6 +311,23 @@
   font-size: 14px;
   font-weight: 700;
   color: var(--brand-500);
+}
+
+// Fix long file names in avatar/CV upload pushing UI
+:host ::ng-deep app-avatar-upload-button {
+  .file-preview {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .file-name {
+    display: block;
+    max-width: 100%;
+
+    white-space: normal;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
 }
 
 @media (max-width: 640px) {

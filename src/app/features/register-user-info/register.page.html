@@ -1,12 +1,14 @@
 <div class="register-container">
   <!-- Nút quay lại ở trên cùng -->
-  <div class="back-navigation" (click)="goBackToLogin()" *ngIf="currentStep === 1">
+  @if (currentStep === 1) {
+  <div class="back-navigation" (click)="goBackToLogin()">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="back-icon">
       <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
         stroke-linejoin="round" />
     </svg>
     <span>Quay lại đăng nhập</span>
   </div>
+  }
 
   <div class="process-step-wrapper">
     <app-process-step [steps]="steps" [currentStep]="currentStep"></app-process-step>
@@ -17,25 +19,20 @@
     <div class="form-row">
       <div class="form-group">
         <app-input-text headerInput="Email FPT" [(value)]="email" (valueChange)="onEmailInput($event)"
-          placeholder="example@fpt.com" [required]="true">
+          placeholder="example@fpt.com" [required]="true" [errorMessage]="errors['email'] || ''">
         </app-input-text>
-        <span class="error-message" *ngIf="errors['email']">{{ errors['email'] }}</span>
       </div>
 
       <div class="form-group">
         <app-input-text headerInput="Họ & Tên" [(value)]="fullName" (valueChange)="onFullNameInput($event)"
-          placeholder="Nhập họ tên" [required]="true" [maxLength]="100" [showLimit]="true">
+          placeholder="Nhập họ tên" [required]="true" [maxLength]="100" [showLimit]="true" [errorMessage]="errors['fullName'] || ''">
         </app-input-text>
-        <span class="error-message" *ngIf="errors['fullName']">{{ errors['fullName'] }}</span>
       </div>
 
       <div class="form-group">
         <app-input-text headerInput="CCCD/CMND" [value]="idNumber" (valueChange)="onIdNumberInput($event)"
-          placeholder="Nhập CCCD/CMND" [required]="true" [maxLength]="12">
+          placeholder="Nhập CCCD/CMND" [required]="true" [maxLength]="12" [showLimit]="true" [errorMessage]="errors['idNumber'] || ''">
         </app-input-text>
-        @if (errors['idNumber']) {
-        <span class="error-message">{{ errors['idNumber'] }}</span>
-        }
       </div>
 
       <!-- BIRTH DATE -->
@@ -57,20 +54,15 @@
 
       <div class="form-group form-row-full">
         <app-input-text headerInput="Địa chỉ" [(value)]="address" (valueChange)="onAddressInput($event)"
-          placeholder="Nhập địa chỉ" [required]="true">
+          placeholder="Nhập địa chỉ" [required]="true" [maxLength]="250" [showLimit]="true" [errorMessage]="errors['address'] || ''">
         </app-input-text>
-        <span class="error-message" *ngIf="errors['address']">{{ errors['address'] }}</span>
       </div>
 
       <!-- PHONE -->
       <div class="form-group">
         <app-input-text headerInput="Số điện thoại" [(value)]="phoneNumber" (valueChange)="onPhoneNumberInput($event)"
-          (keydown)="onlyNumber($event)" placeholder="Nhập số điện thoại">
+          (keydown)="onlyNumber($event)" placeholder="Nhập số điện thoại" [maxLength]="12" [showLimit]="true" [errorMessage]="errors['phoneNumber'] || ''">
         </app-input-text>
-
-        <span class="error-message" *ngIf="errors['phoneNumber']">
-          {{ errors['phoneNumber'] }}
-        </span>
       </div>
 
       <div class="form-group">
@@ -78,7 +70,9 @@
           <span class="select-label">Vị trí <span class="required-star">*</span></span>
           <select class="custom-select" [(ngModel)]="positionCode" (ngModelChange)="onPositionSelect($event)">
             <option value="" disabled>Chọn vai trò của bạn</option>
-            <option *ngFor="let pos of positions" [value]="pos.name">{{ pos.name }}</option>
+            @for (pos of positions; track pos.name) {
+            <option [value]="pos.name">{{ pos.name }}</option>
+            }
           </select>
         </div>
         @if (errors['positionCode']) {
@@ -90,14 +84,18 @@
         <app-avatar-upload-button label="Ảnh đại diện" buttonText="Tải ảnh lên"
           acceptFormats="image/png,image/jpeg,image/jpg" helperText="Định dạng .png, .jpeg, .jpg" [required]="true"
           (fileChange)="onAvatarChange($event)"></app-avatar-upload-button>
-        <span class="error-message" *ngIf="errors['avatar']">{{ errors['avatar'] }}</span>
+        @if (errors['avatar']) {
+        <span class="error-message">{{ errors['avatar'] }}</span>
+        }
       </div>
 
       <div class="form-group">
         <app-avatar-upload-button label="CV" buttonText="Tải file lên" acceptFormats=".pdf,.doc,.docx"
           helperText="Định dạng .docx, .pdf" [required]="true"
           (fileChange)="onCvChange($event)"></app-avatar-upload-button>
-        <span class="error-message" *ngIf="errors['cv']">{{ errors['cv'] }}</span>
+        @if (errors['cv']) {
+        <span class="error-message">{{ errors['cv'] }}</span>
+        }
       </div>
 
       @if (isInternPosition()) {
@@ -141,53 +139,48 @@
           của Intern Hub
         </span>
       </label>
-      <span class="error-message" *ngIf="errors['agreeTerms']">{{ errors['agreeTerms'] }}</span>
+      @if (errors['agreeTerms']) {
+      <span class="error-message">{{ errors['agreeTerms'] }}</span>
+      }
     </div>
 
     <div class="button-section step-buttons">
       <app-button-container content="Quay lại" size="md" backgroundColor="var(--neutral-color-10)"
         color="var(--brand-500)" border="1px solid var(--brand-500)" width="100%"
         (buttonClick)="goBackToLogin()"></app-button-container>
-      <app-button-container content="Tiếp theo" size="md"
-        [backgroundColor]="agreeTerms ? 'var(--brand-500)' : 'var(--neutral-color-200)'" width="100%"
-        (buttonClick)="goToStep2()"></app-button-container>
+      <div class="next-btn-wrapper" [class.disabled]="!agreeTerms">
+        <app-button-container class="next-btn" [class.next-btn--disabled]="!agreeTerms"
+          content="Tiếp theo" size="md" width="100%"
+          [backgroundColor]="agreeTerms ? 'var(--brand-500)' : 'var(--neutral-color-200)'"
+          [color]="agreeTerms ? 'var(--neutral-color-10)' : 'var(--neutral-color-400)'"
+          (buttonClick)="agreeTerms && goToStep2()"></app-button-container>
+      </div>
     </div>
   </div>
 
-  <div class="form-section" *ngIf="currentStep === 2">
+  @if (currentStep === 2) {
+  <div class="form-section">
     <h2 class="register-title">Xác nhận thông tin cá nhân</h2>
     <div class="form-row">
       <!-- EMAIL -->
       <div class="form-group">
-        <app-input-text headerInput="Email FPT" [(value)]="email" (valueChange)="onEmailInput($event)"
-          placeholder="example@fpt.com" [required]="true">
+        <app-input-text headerInput="Email FPT" [value]="email"
+          placeholder="example@fpt.com" [required]="true" [readonly]="true">
         </app-input-text>
-
-        <span class="error-message" *ngIf="errors['email']">
-          {{ errors['email'] }}
-        </span>
       </div>
 
       <!-- FULL NAME -->
       <div class="form-group">
-        <app-input-text headerInput="Họ & Tên" [(value)]="fullName" (valueChange)="onFullNameInput($event)"
-          placeholder="Nhập họ tên">
+        <app-input-text headerInput="Họ & Tên" [value]="fullName"
+          placeholder="Nhập họ tên" [readonly]="true">
         </app-input-text>
-
-        <span class="error-message" *ngIf="errors['fullName']">
-          {{ errors['fullName'] }}
-        </span>
       </div>
 
       <!-- CCCD -->
       <div class="form-group">
-        <app-input-text headerInput="Số CCCD" [(value)]="idNumber" (valueChange)="onIdNumberInput($event)"
-          (keydown)="onlyNumber($event)" placeholder="Nhập 12 số">
+        <app-input-text headerInput="Số CCCD" [value]="idNumber"
+          placeholder="Nhập 12 số" [readonly]="true">
         </app-input-text>
-
-        <span class="error-message" *ngIf="errors['idNumber']">
-          {{ errors['idNumber'] }}
-        </span>
       </div>
 
       <div class="form-group">
@@ -217,8 +210,12 @@
         <div class="readonly-file-field">
           <span class="readonly-file-label">Ảnh đại diện <span class="required-star">*</span></span>
           <div class="readonly-file-preview">
-            <img *ngIf="avatarPreviewUrl" [src]="avatarPreviewUrl" alt="Avatar preview" class="avatar-preview-img" />
-            <span class="file-name" *ngIf="avatarFile">{{ avatarFile.name }}</span>
+            @if (avatarPreviewUrl) {
+            <img [src]="avatarPreviewUrl" alt="Avatar preview" class="avatar-preview-img" />
+            }
+            @if (avatarFile) {
+            <span class="file-name">{{ avatarFile.name }}</span>
+            }
           </div>
         </div>
       </div>
@@ -228,12 +225,15 @@
           <span class="readonly-file-label">CV <span class="required-star">*</span></span>
           <div class="readonly-file-preview">
             <span class="cv-icon">PDF</span>
-            <span class="file-name" *ngIf="cvFile">{{ cvFileName }}</span>
+            @if (cvFile) {
+            <span class="file-name">{{ cvFileName }}</span>
+            }
           </div>
         </div>
       </div>
 
-      <div class="form-group" *ngIf="isInternPosition()">
+      @if (isInternPosition()) {
+      <div class="form-group">
         <div class="readonly-file-field">
           <span class="readonly-file-label">Ngày bắt đầu thực tập <span class="required-star">*</span></span>
           <div class="readonly-file-value">
@@ -241,8 +241,10 @@
           </div>
         </div>
       </div>
+      }
 
-      <div class="form-group" *ngIf="isInternPosition()">
+      @if (isInternPosition()) {
+      <div class="form-group">
         <div class="readonly-file-field">
           <span class="readonly-file-label">Ngày kết thúc thực tập <span class="required-star">*</span></span>
           <div class="readonly-file-value">
@@ -250,13 +252,16 @@
           </div>
         </div>
       </div>
+      }
     </div>
 
-    <div class="message-section" *ngIf="errorMessage">
+    @if (errorMessage) {
+    <div class="message-section">
       <div class="error-message api-error">
         {{ errorMessage }}
       </div>
     </div>
+    }
 
     <div class="button-section step2-buttons">
       <app-button-container content="Quay lại" size="md" backgroundColor="var(--neutral-color-10)"
@@ -267,8 +272,10 @@
         width="100%" (buttonClick)="confirmAndSubmit()"></app-button-container>
     </div>
   </div>
+  }
 
-  <div class="success-section" *ngIf="currentStep === 3">
+  @if (currentStep === 3) {
+  <div class="success-section">
     <div class="success-card">
       <div class="success-icon">
         <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -284,7 +291,10 @@
       </div>
     </div>
   </div>
+  }
 </div>
 
-<app-terms-popup *ngIf="showTermsPopup" (closePopup)="onTermsAccepted()"
+@if (showTermsPopup) {
+<app-terms-popup (closePopup)="onTermsAccepted()"
   (acceptTerms)="onTermsAccepted()"></app-terms-popup>
+}
