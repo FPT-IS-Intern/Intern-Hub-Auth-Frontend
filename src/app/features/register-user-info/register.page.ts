@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs/operators';
 
 import {
   AvatarUploadButtonComponent,
@@ -32,15 +34,136 @@ import { RegisterUserRequest } from '../../models/register.model';
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
 })
-export class RegisterPage {
+export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   private readonly registerUserService = inject(RegisterUserService);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
+  private readonly elementRef = inject(ElementRef);
 
   positions: PositionResponse[] = [];
+  private inactivityTimer: ReturnType<typeof setTimeout> | null = null;
+  private readonly INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 phút
+
+  private emailCheck$ = new Subject<string>();
+  private emailCheckSub: Subscription | null = null;
+  isCheckingEmail = false;
 
   ngOnInit() {
     this.loadPositions();
+    this.startInactivityTimer();
+    this.setupEmailCheck();
+  }
+
+  private setupEmailCheck(): void {
+    this.emailCheckSub = this.emailCheck$.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      filter(email => /^[^\s@]+@fpt\.com$/i.test(email)),
+      switchMap(email => {
+        this.isCheckingEmail = true;
+        return this.registerUserService.checkEmailExists(email);
+      })
+    ).subscribe({
+      next: (response) => {
+        this.isCheckingEmail = false;
+        if (response?.data === true) {
+          this.errors['email'] = 'Tài khoản đã được đăng ký';
+        } else if (!this.errors['email']) {
+          delete this.errors['email'];
+        }
+        this.changeDetectorRef.detectChanges();
+      },
+      error: () => {
+        this.isCheckingEmail = false;
+        this.changeDetectorRef.detectChanges();
+      }
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.setupDatePickerAutoFormat();
+  }
+
+  /**
+   * Event delegation: bắt keydown và input trên tất cả input bên trong app-date-picker
+   * Để chỉ cho phép nhập số, tự động chèn '/' sau ngày và tháng
+   */
+  private setupDatePickerAutoFormat(): void {
+    const container = this.elementRef.nativeElement as HTMLElement;
+
+    // Chỉ cho phép nhập số và các phím điều khiển
+    container.addEventListener('keydown', (event: KeyboardEvent) => {
+      const target = event.target as HTMLInputElement;
+      if (target.tagName !== 'INPUT' || !target.closest('app-date-picker')) return;
+
+      const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter', 'Escape'];
+      if (allowedKeys.includes(event.key)) return;
+      if (event.ctrlKey || event.metaKey) return; // Cho phép Ctrl+C, Ctrl+V...
+
+      if (!/^[0-9]$/.test(event.key)) {
+        event.preventDefault();
+      }
+    }, true);
+
+    // Tự động chèn '/' sau ngày (2 số) và tháng (2 số tiếp)
+    container.addEventListener('input', (event: Event) => {
+      const target = event.target as HTMLInputElement;
+      if (target.tagName !== 'INPUT' || !target.closest('app-date-picker')) return;
+      this.formatDatePickerInput(target);
+    }, true);
+
+    // Chặn paste ký tự không hợp lệ
+    container.addEventListener('paste', (event: ClipboardEvent) => {
+      const target = event.target as HTMLInputElement;
+      if (target.tagName !== 'INPUT' || !target.closest('app-date-picker')) return;
+      const pasted = event.clipboardData?.getData('text') || '';
+      if (!/^[0-9/]*$/.test(pasted)) {
+        event.preventDefault();
+      }
+    }, true);
+  }
+
+  private formatDatePickerInput(input: HTMLInputElement): void {
+    let digits = input.value.replace(/[^0-9]/g, '');
+    if (digits.length > 8) digits = digits.substring(0, 8);
+
+    let formatted = '';
+    if (digits.length > 0) {
+      formatted = digits.substring(0, Math.min(2, digits.length));
+    }
+    if (digits.length > 2) {
+      formatted += '/' + digits.substring(2, Math.min(4, digits.length));
+    }
+    if (digits.length > 4) {
+      formatted += '/' + digits.substring(4, 8);
+    }
+
+    if (input.value !== formatted) {
+      input.value = formatted;
+      const pos = formatted.length;
+      setTimeout(() => input.setSelectionRange(pos, pos));
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.clearInactivityTimer();
+    this.emailCheckSub?.unsubscribe();
+  }
+
+  private startInactivityTimer(): void {
+    this.clearInactivityTimer();
+    this.inactivityTimer = setTimeout(() => {
+      if (this.currentStep === 1) {
+        this.goBackToLogin();
+      }
+    }, this.INACTIVITY_TIMEOUT);
+  }
+
+  private clearInactivityTimer(): void {
+    if (this.inactivityTimer) {
+      clearTimeout(this.inactivityTimer);
+      this.inactivityTimer = null;
+    }
   }
 
 
@@ -61,6 +184,8 @@ export class RegisterPage {
   positionCode = '';
   internshipStartDate: Date | null = null;
   internshipEndDate: Date | null = null;
+  internshipStartDateStr = '';
+  internshipEndDateStr = '';
 
   avatarFile: File | null = null;
   cvFile: File | null = null;
@@ -79,19 +204,51 @@ export class RegisterPage {
   }
 
   onAvatarChange(file: AvatarUploadedFile | null): void {
-    this.avatarFile = file?.file || null;
-    this.avatarPreviewUrl = file?.previewUrl || null;
-    if (this.avatarFile) {
-      delete this.errors['avatar'];
+    if (!file?.file) {
+      this.avatarFile = null;
+      this.avatarPreviewUrl = null;
+      return;
     }
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+    if (!allowedTypes.includes(file.file.type)) {
+      this.errors['avatar'] = 'Sai định dạng (chỉ nhận .png, .jpg).';
+      this.avatarFile = null;
+      this.avatarPreviewUrl = null;
+      return;
+    }
+    if (file.file.size > 2 * 1024 * 1024) {
+      this.errors['avatar'] = 'File vượt quá 2MB';
+      this.avatarFile = null;
+      this.avatarPreviewUrl = null;
+      return;
+    }
+    this.avatarFile = file.file;
+    this.avatarPreviewUrl = file.previewUrl || null;
+    delete this.errors['avatar'];
   }
 
   onCvChange(file: AvatarUploadedFile | null): void {
-    this.cvFile = file?.file || null;
-    this.cvFileName = file?.fileName || '';
-    if (this.cvFile) {
-      delete this.errors['cv'];
+    if (!file?.file) {
+      this.cvFile = null;
+      this.cvFileName = '';
+      return;
     }
+    const fileName = file.file.name.toLowerCase();
+    if (!fileName.endsWith('.pdf') && !fileName.endsWith('.docx')) {
+      this.errors['cv'] = 'Sai định dạng (chỉ nhận .pdf, .docx).';
+      this.cvFile = null;
+      this.cvFileName = '';
+      return;
+    }
+    if (file.file.size > 10 * 1024 * 1024) {
+      this.errors['cv'] = 'File vượt quá 10MB';
+      this.cvFile = null;
+      this.cvFileName = '';
+      return;
+    }
+    this.cvFile = file.file;
+    this.cvFileName = file.fileName || '';
+    delete this.errors['cv'];
   }
 
   onTermsChange(): void {
@@ -103,10 +260,81 @@ export class RegisterPage {
   onlyDateInput(event: KeyboardEvent): void {
     const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
     if (allowedKeys.includes(event.key)) return;
-    if (!/^[0-9/]$/.test(event.key)) {
+    if (!/^[0-9]$/.test(event.key)) {
       event.preventDefault();
-      this.errors['birthDate'] = 'Chỉ được nhập số và dấu /';
     }
+  }
+
+  /** Auto-format: chèn '/' sau ngày (2 ký tự) và tháng (5 ký tự) */
+  autoFormatDate(event: Event): string {
+    const input = event.target as HTMLInputElement;
+    const cursorPos = input.selectionStart || 0;
+    let digits = input.value.replace(/[^0-9]/g, '');
+
+    if (digits.length > 8) {
+      digits = digits.substring(0, 8);
+    }
+
+    let formatted = '';
+    if (digits.length > 0) {
+      formatted = digits.substring(0, Math.min(2, digits.length));
+    }
+    if (digits.length > 2) {
+      formatted += '/' + digits.substring(2, Math.min(4, digits.length));
+    }
+    if (digits.length > 4) {
+      formatted += '/' + digits.substring(4, 8);
+    }
+
+    input.value = formatted;
+
+    // Adjust cursor position after auto-formatting
+    const newPos = formatted.length;
+    setTimeout(() => input.setSelectionRange(newPos, newPos));
+
+    return formatted;
+  }
+
+  onBirthDateAutoFormat(event: Event): void {
+    const formatted = this.autoFormatDate(event);
+    this.birthDateStr = formatted;
+    this.onBirthDateInput(formatted);
+  }
+
+  onInternStartDateAutoFormat(event: Event): void {
+    const formatted = this.autoFormatDate(event);
+    this.internshipStartDateStr = formatted;
+    this.parseDateStr(formatted, 'internshipStartDate', 'internshipStartDate');
+  }
+
+  onInternEndDateAutoFormat(event: Event): void {
+    const formatted = this.autoFormatDate(event);
+    this.internshipEndDateStr = formatted;
+    this.parseDateStr(formatted, 'internshipEndDate', 'internshipEndDate');
+    // Re-validate end > start
+    if (this.internshipEndDate && this.internshipStartDate && this.internshipEndDate <= this.internshipStartDate) {
+      this.errors['internshipEndDate'] = 'Ngày kết thúc phải sau ngày bắt đầu';
+    }
+  }
+
+  private parseDateStr(value: string, dateField: 'internshipStartDate' | 'internshipEndDate', errorKey: string): void {
+    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    if (!dateRegex.test(value)) {
+      if (value.length > 0) {
+        this.errors[errorKey] = 'Định dạng phải là DD/MM/YYYY';
+      }
+      this[dateField] = null;
+      return;
+    }
+    const [day, month, year] = value.split('/').map(Number);
+    const parsed = new Date(year, month - 1, day);
+    if (parsed.getDate() !== day || parsed.getMonth() !== month - 1) {
+      this.errors[errorKey] = 'Ngày không hợp lệ';
+      this[dateField] = null;
+      return;
+    }
+    this[dateField] = parsed;
+    delete this.errors[errorKey];
   }
 
   onlyNumber(event: KeyboardEvent): void {
@@ -122,14 +350,14 @@ export class RegisterPage {
     const pasted = event.clipboardData?.getData('text') || '';
     if (/\D/.test(pasted)) {
       event.preventDefault();
-      this.errors['idNumber'] = 'Số CCCD chỉ được chứa chữ số (0-9)';
+      this.errors['idNumber'] = 'Sai định dạng CCCD/CMND';
     }
   }
   onPhoneNumberPaste(event: ClipboardEvent): void {
     const pasted = event.clipboardData?.getData('text') || '';
-    if (/\D/.test(pasted)) {
+    if (!/^[0-9+]+$/.test(pasted)) {
       event.preventDefault();
-      this.errors['phoneNumber'] = 'SĐT chỉ được chứa số';
+      this.errors['phoneNumber'] = 'Số điện thoại phải có 10 số bắt đầu bằng 0 hoặc +84';
     }
   }
   onBirthDatePaste(event: ClipboardEvent): void {
@@ -146,64 +374,89 @@ export class RegisterPage {
       this.errors['email'] = 'Email không được để trống';
       return;
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@fpt\.com$/i;
     if (!emailRegex.test(this.email)) {
-      this.errors['email'] = 'Email không đúng định dạng';
-      return;
-    }
-    if (!this.email.toLowerCase().endsWith('@fpt.com')) {
-      this.errors['email'] = 'Email phải kết thúc bằng @fpt.com';
+      this.errors['email'] = 'Sai định dạng email';
       return;
     }
     delete this.errors['email'];
+    // Trigger debounced email duplicate check
+    this.emailCheck$.next(this.email);
   }
   onEmailBlur(): void {
     this.onEmailInput(this.email);
   }
 
   onFullNameInput(value: string): void {
-    this.fullName = value.trim();
+    if (value.length > 100) {
+      value = value.substring(0, 100);
+    }
+    this.fullName = value;
+    const trimmed = value.trim();
     const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
-    if (!this.fullName) {
-      this.errors['fullName'] = 'Họ tên không được để trống';
-    } else if (this.fullName.length > 100) {
-      this.errors['fullName'] = 'Họ tên không quá 100 ký tự';
-    } else if (!nameRegex.test(this.fullName)) {
-      this.errors['fullName'] = 'Họ tên chỉ được chứa chữ cái và khoảng trắng';
+    if (!trimmed) {
+      this.errors['fullName'] = 'Họ & tên không được để trống';
+    } else if (trimmed.length > 100) {
+      this.errors['fullName'] = 'Họ & tên không quá 100 ký tự';
+    } else if (!nameRegex.test(trimmed)) {
+      this.errors['fullName'] = 'Không chứa chữ số và ký tự đặc biệt';
     } else {
       delete this.errors['fullName'];
     }
   }
 
+  onFullNameBlur(): void {
+    if (this.fullName) {
+      this.fullName = this.fullName
+        .trim()
+        .split(/\s+/)
+        .filter(w => w.length > 0)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+    }
+    this.onFullNameInput(this.fullName);
+  }
+
   onIdNumberInput(value: string): void {
     if (/\D/.test(value)) {
-      this.errors['idNumber'] = 'Số CCCD chỉ được chứa chữ số (0-9)';
-      this.idNumber = value.replace(/\D/g, '');
+      this.errors['idNumber'] = 'Vui lòng nhập đúng định dạng CCCD/CMND';
+      this.idNumber = value.replace(/\D/g, '').substring(0, 12);
       return;
+    }
+    if (value.length > 12) {
+      value = value.substring(0, 12);
     }
     this.idNumber = value;
     if (!value) {
-      this.errors['idNumber'] = 'Số CCCD không được để trống';
-    } else if (value.length !== 12) {
-      this.errors['idNumber'] = 'Số CCCD phải có 12 chữ số';
+      this.errors['idNumber'] = 'Vui lòng nhập đúng định dạng CCCD/CMND';
+    } else if (value.length !== 9 && value.length !== 12) {
+      this.errors['idNumber'] = 'Vui lòng nhập đúng định dạng CCCD/CMND';
     } else {
       delete this.errors['idNumber'];
     }
   }
 
   onPhoneNumberInput(value: string): void {
-    if (/\D/.test(value)) {
-      this.errors['phoneNumber'] = 'SĐT chỉ được chứa số';
-      this.phoneNumber = value.replace(/\D/g, '');
-      return;
+    if (value.length > 12) {
+      value = value.substring(0, 12);
     }
     this.phoneNumber = value;
     if (!value) {
-      this.errors['phoneNumber'] = 'SĐT không được để trống';
-    } else if (!/^0\d{9}$/.test(value)) {
-      this.errors['phoneNumber'] = 'SĐT phải 10 số và bắt đầu bằng 0';
-    } else {
+      this.errors['phoneNumber'] = 'Số điện thoại không được để trống';
+    } else if (/^0\d{9}$/.test(value)) {
       delete this.errors['phoneNumber'];
+    } else if (/^\+84\d{9}$/.test(value)) {
+      delete this.errors['phoneNumber'];
+    } else {
+      this.errors['phoneNumber'] = 'Số điện thoại phải có 10 số bắt đầu bằng 0 hoặc +84';
+    }
+  }
+
+  onPhoneKeydown(event: KeyboardEvent): void {
+    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
+    if (allowedKeys.includes(event.key)) return;
+    if (!/^[0-9+]$/.test(event.key)) {
+      event.preventDefault();
     }
   }
 
@@ -222,8 +475,18 @@ export class RegisterPage {
     }
     const [day, month, year] = value.split('/').map(Number);
     const inputDate = new Date(year, month - 1, day);
-    if (inputDate >= new Date()) {
-      this.errors['birthDate'] = 'Ngày sinh phải là ngày trong quá khứ';
+    const today = new Date();
+    if (inputDate >= today) {
+      this.errors['birthDate'] = 'Ngày sinh phải nhỏ hơn ngày hiện tại';
+      this.birthDate = null;
+      return;
+    }
+    const age = today.getFullYear() - inputDate.getFullYear();
+    const monthDiff = today.getMonth() - inputDate.getMonth();
+    const dayDiff = today.getDate() - inputDate.getDate();
+    const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
+    if (actualAge < 16) {
+      this.errors['birthDate'] = 'Phải đủ độ tuổi lao động/thực tập (>=16 tuổi)';
       this.birthDate = null;
       return;
     }
@@ -232,10 +495,19 @@ export class RegisterPage {
   }
 
   onAddressInput(value: string): void {
+    if (value && value.length > 250) {
+      value = value.substring(0, 250);
+    }
     this.address = value?.trim() || '';
 
     if (!this.address) {
       this.errors['address'] = 'Địa chỉ không được để trống';
+    } else if (this.address.length > 250) {
+      this.errors['address'] = 'Địa chỉ tối đa 250 ký tự';
+    } else if (!/^[a-zA-ZÀ-ỹ0-9\s,\/\-\.]+$/.test(this.address)) {
+      this.errors['address'] = 'Địa chỉ chỉ được chứa chữ, số và các ký tự , / - .';
+    } else if (!/[a-zA-ZÀ-ỹ]/.test(this.address) || !/[0-9]/.test(this.address)) {
+      this.errors['address'] = 'Địa chỉ phải bao gồm cả số nhà/ngõ và tên đường.';
     } else {
       delete this.errors['address'];
     }
@@ -269,6 +541,19 @@ export class RegisterPage {
   onBirthDateChange(date: Date | null): void {
     this.birthDate = date;
     if (date) {
+      const today = new Date();
+      if (date >= today) {
+        this.errors['birthDate'] = 'Ngày sinh phải nhỏ hơn ngày hiện tại';
+        return;
+      }
+      const age = today.getFullYear() - date.getFullYear();
+      const monthDiff = today.getMonth() - date.getMonth();
+      const dayDiff = today.getDate() - date.getDate();
+      const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
+      if (actualAge < 16) {
+        this.errors['birthDate'] = 'Bạn phải đủ 16 tuổi trở lên';
+        return;
+      }
       delete this.errors['birthDate'];
     }
   }
@@ -281,6 +566,10 @@ export class RegisterPage {
   onInternshipEndDateChange(date: Date | null): void {
     this.internshipEndDate = date;
     if (date) {
+      if (this.internshipStartDate && date <= this.internshipStartDate) {
+        this.errors['internshipEndDate'] = 'Ngày kết thúc phải sau ngày bắt đầu';
+        return;
+      }
       delete this.errors['internshipEndDate'];
     }
   }
@@ -295,10 +584,26 @@ export class RegisterPage {
     return `${dd}/${mm}/${yyyy}`;
   }
 
+  get maxBirthDate(): Date {
+    const today = new Date();
+    return new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
+  }
+
+  get isFormValid(): boolean {
+    if (Object.keys(this.errors).length > 0) return false;
+    if (!this.email || !this.fullName || !this.idNumber || !this.birthDate) return false;
+    if (!this.address || !this.phoneNumber || !this.positionCode) return false;
+    if (!this.avatarFile || !this.cvFile) return false;
+    if (this.isInternPosition() && (!this.internshipStartDate || !this.internshipEndDate)) return false;
+    if (!this.agreeTerms) return false;
+    return true;
+  }
+
   goToStep2(): void {
     if (!this.validateForm()) {
       return;
     }
+    this.clearInactivityTimer();
     this.currentStep = 2;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -341,7 +646,12 @@ export class RegisterPage {
       },
       error: (error: Error) => {
         this.isLoading = false;
-        this.errorMessage = error.message || 'Đăng ký thất bại. Vui lòng thử lại.';
+        if (error.message.includes('đã tồn tại') || error.message.includes('xung đột')) {
+          this.errors['email'] = 'Tài khoản đã được đăng ký';
+          this.errorMessage = 'Tài khoản đã được đăng ký';
+        } else {
+          this.errorMessage = error.message || 'Đăng ký thất bại. Vui lòng thử lại.';
+        }
         this.changeDetectorRef.detectChanges();
       },
     });
@@ -403,43 +713,69 @@ export class RegisterPage {
   }
 
   private validatePersonalInfo(): void {
+    // Email
     if (!this.email.trim()) {
       this.errors['email'] = 'Email không được để trống';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.email)) {
-      this.errors['email'] = 'Email không đúng định dạng';
-    } else if (!this.email.toLowerCase().endsWith('@fpt.com')) {
-      this.errors['email'] = 'Email phải kết thúc bằng @fpt.com';
+    } else if (!/^[^\s@]+@fpt\.com$/i.test(this.email)) {
+      this.errors['email'] = 'Sai định dạng email';
     }
+
+    // Họ & tên
     const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
     if (!this.fullName.trim()) {
-      this.errors['fullName'] = 'Họ tên không được để trống';
+      this.errors['fullName'] = 'Họ & tên không được để trống';
     } else if (this.fullName.length > 100) {
-      this.errors['fullName'] = 'Họ tên không quá 100 ký tự';
+      this.errors['fullName'] = 'Họ & tên không quá 100 ký tự';
     } else if (!nameRegex.test(this.fullName)) {
-      this.errors['fullName'] = 'Họ tên chỉ được chứa chữ cái và khoảng trắng';
+      this.errors['fullName'] = 'Không chứa chữ số và ký tự đặc biệt';
     }
+
+    // CCCD/CMND: 9 hoặc 12 số
     if (!this.idNumber.trim()) {
-      this.errors['idNumber'] = 'Số CCCD/CMND không được để trống';
-    } else if (this.idNumber.length !== 12) {
-      this.errors['idNumber'] = 'Số CCCD phải có 12 chữ số';
+      this.errors['idNumber'] = 'Vui lòng nhập đúng định dạng CCCD/CMND';
+    } else if (this.idNumber.length !== 9 && this.idNumber.length !== 12) {
+      this.errors['idNumber'] = 'Vui lòng nhập đúng định dạng CCCD/CMND';
     }
+
+    // Ngày sinh: < ngày hiện tại và >= 16 tuổi
     if (!this.birthDate) {
       this.errors['birthDate'] = 'Ngày sinh không được để trống';
-    } else if (this.birthDate >= new Date()) {
-      this.errors['birthDate'] = 'Ngày sinh phải là ngày trong quá khứ';
+    } else {
+      const today = new Date();
+      if (this.birthDate >= today) {
+        this.errors['birthDate'] = 'Ngày sinh phải nhỏ hơn ngày hiện tại';
+      } else {
+        const age = today.getFullYear() - this.birthDate.getFullYear();
+        const monthDiff = today.getMonth() - this.birthDate.getMonth();
+        const dayDiff = today.getDate() - this.birthDate.getDate();
+        const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
+        if (actualAge < 16) {
+          this.errors['birthDate'] = 'Bạn phải đủ 16 tuổi trở lên';
+        }
+      }
     }
+
+    // Địa chỉ
     if (!this.address.trim()) {
       this.errors['address'] = 'Địa chỉ không được để trống';
+    } else if (this.address.length > 250) {
+      this.errors['address'] = 'Địa chỉ tối đa 250 ký tự';
+    } else if (!/^[a-zA-ZÀ-ỹ0-9\s,\/\-\.]+$/.test(this.address)) {
+      this.errors['address'] = 'Địa chỉ chỉ được chứa chữ, số và các ký tự , / - .';
+    } else if (!/[a-zA-ZÀ-ỹ]/.test(this.address) || !/[0-9]/.test(this.address)) {
+      this.errors['address'] = 'Địa chỉ phải bao gồm cả số nhà/ngõ và tên đường.';
     }
+
+    // Số điện thoại: 10 số bắt đầu bằng 0 hoặc +84
     if (!this.phoneNumber.trim()) {
       this.errors['phoneNumber'] = 'Số điện thoại không được để trống';
-    } else if (!/^0\d{9}$/.test(this.phoneNumber)) {
-      this.errors['phoneNumber'] = 'Số điện thoại không đúng định dạng';
+    } else if (!/^(0\d{9}|\+84\d{9})$/.test(this.phoneNumber)) {
+      this.errors['phoneNumber'] = 'Số điện thoại phải có 10 số bắt đầu bằng 0 hoặc +84';
     }
+
+    // Vị trí
     if (!this.positionCode.trim()) {
       this.errors['positionCode'] = 'Vị trí không được để trống';
-    } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(this.positionCode)) {
-      this.errors['positionCode'] = 'Vị trí chỉ được chứa chữ cái và khoảng trắng';
     }
   }
 

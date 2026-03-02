@@ -60,6 +60,13 @@ export class RegisterUserService {
     return throwError(() => new Error(errorMessage));
   }
 
+  checkEmailExists(email: string): Observable<ResponseApi<boolean>> {
+    return this.httpClient.get<ResponseApi<boolean>>(
+      `${this.baseUrl}/check-email`,
+      { params: { email } }
+    ).pipe(catchError(this.handleError));
+  }
+
   getPositions(): Observable<ResponseApi<PositionResponse[]>> {
     return this.httpClient.get<ResponseApi<PositionResponse[]>>(`${this.baseUrl}/positions`).pipe(
       catchError((error) => {
