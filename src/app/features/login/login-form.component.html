@@ -1,30 +1,6 @@
 <app-mobile-warning />
 <div class="login-page">
   <div class="login-container">
-    <!-- Phía bên trái: Giới thiệu -->
-    <div class="login-intro">
-      <div class="login-intro__content">
-        <h2 class="login-intro__title">Co-Create the Next</h2>
-        <p class="login-intro__subtitle">Cùng kiến tạo tương lai số</p>
-        <div class="login-intro__features">
-          <div class="feature-item">
-            <span>Dấn thân vào môi trường làm việc năng động, trẻ trung và đầy cảm hứng.</span>
-          </div>
-          <div class="feature-item">
-            <span
-              >Bứt phá giới hạn, nâng tầm kỹ năng thực chiến cùng đội ngũ chuyên gia hàng đầu.</span
-            >
-          </div>
-          <div class="feature-item">
-            <span
-              >Kết nối cơ hội sự nghiệp không giới hạn trong lòng hệ sinh thái công nghệ FPT.</span
-            >
-          </div>
-        </div>
-      </div>
-      <div class="login-intro__decoration"></div>
-    </div>
-
     <!-- Phía bên phải: Form đăng nhập -->
     <div class="login-card">
       <h1 class="title">Đăng nhập</h1>
@@ -59,7 +35,7 @@
         <button type="submit" class="btn-login" [disabled]="checkInputRequired() || isLoading()">
           @if (isLoading()) {
             <span class="loading-state">
-              <i class="fas fa-spinner fa-spin"></i>
+              <i class="dsi dsi-activity-line dsi-spin"></i>
               Đang xử lý...
             </span>
           } @else {
