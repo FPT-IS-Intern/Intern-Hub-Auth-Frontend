@@ -1,10 +1,7 @@
 <div class="register-container">
   <!-- Nút quay lại ở trên cùng -->
   <div class="back-navigation" (click)="goBackToLogin()" *ngIf="currentStep === 1">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="back-icon">
-      <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round" />
-    </svg>
+    <i class="dsi dsi-arrow-left-line back-icon dsi-lg"></i>
     <span>Quay lại đăng nhập</span>
   </div>
 
@@ -16,25 +13,43 @@
     <h2 class="register-title">Thông tin cá nhân</h2>
     <div class="form-row">
       <div class="form-group">
-        <app-input-text headerInput="Email FPT" [(value)]="email" (valueChange)="onEmailInput($event)"
-          placeholder="example@fpt.com" [required]="true">
+        <app-input-text
+          headerInput="Email FPT"
+          [(value)]="email"
+          (valueChange)="onEmailInput($event)"
+          placeholder="example@fpt.com"
+          [required]="true"
+        >
         </app-input-text>
         <span class="error-message" *ngIf="errors['email']">{{ errors['email'] }}</span>
       </div>
 
       <div class="form-group">
-        <app-input-text headerInput="Họ & Tên" [(value)]="fullName" (valueChange)="onFullNameInput($event)"
-          placeholder="Nhập họ tên" [required]="true" [maxLength]="100" [showLimit]="true">
+        <app-input-text
+          headerInput="Họ & Tên"
+          [(value)]="fullName"
+          (valueChange)="onFullNameInput($event)"
+          placeholder="Nhập họ tên"
+          [required]="true"
+          [maxLength]="100"
+          [showLimit]="true"
+        >
         </app-input-text>
         <span class="error-message" *ngIf="errors['fullName']">{{ errors['fullName'] }}</span>
       </div>
 
       <div class="form-group">
-        <app-input-text headerInput="CCCD/CMND" [value]="idNumber" (valueChange)="onIdNumberInput($event)"
-          placeholder="Nhập CCCD/CMND" [required]="true" [maxLength]="12">
+        <app-input-text
+          headerInput="CCCD/CMND"
+          [value]="idNumber"
+          (valueChange)="onIdNumberInput($event)"
+          placeholder="Nhập CCCD/CMND"
+          [required]="true"
+          [maxLength]="12"
+        >
         </app-input-text>
         @if (errors['idNumber']) {
-        <span class="error-message">{{ errors['idNumber'] }}</span>
+          <span class="error-message">{{ errors['idNumber'] }}</span>
         }
       </div>
 
@@ -47,7 +62,8 @@
             [size]="'default'"
             [(ngModel)]="birthDate"
             (keydown)="onlyDateInput($event)"
-            (dateChange)="onBirthDateChange($event)">
+            (dateChange)="onBirthDateChange($event)"
+          >
           </app-date-picker>
         </div>
         @if (errors['birthDate']) {
@@ -56,16 +72,26 @@
       </div>
 
       <div class="form-group form-row-full">
-        <app-input-text headerInput="Địa chỉ" [(value)]="address" (valueChange)="onAddressInput($event)"
-          placeholder="Nhập địa chỉ" [required]="true">
+        <app-input-text
+          headerInput="Địa chỉ"
+          [(value)]="address"
+          (valueChange)="onAddressInput($event)"
+          placeholder="Nhập địa chỉ"
+          [required]="true"
+        >
         </app-input-text>
         <span class="error-message" *ngIf="errors['address']">{{ errors['address'] }}</span>
       </div>
 
       <!-- PHONE -->
       <div class="form-group">
-        <app-input-text headerInput="Số điện thoại" [(value)]="phoneNumber" (valueChange)="onPhoneNumberInput($event)"
-          (keydown)="onlyNumber($event)" placeholder="Nhập số điện thoại">
+        <app-input-text
+          headerInput="Số điện thoại"
+          [(value)]="phoneNumber"
+          (valueChange)="onPhoneNumberInput($event)"
+          (keydown)="onlyNumber($event)"
+          placeholder="Nhập số điện thoại"
+        >
         </app-input-text>
 
         <span class="error-message" *ngIf="errors['phoneNumber']">
@@ -76,57 +102,85 @@
       <div class="form-group">
         <div class="select-field">
           <span class="select-label">Vị trí <span class="required-star">*</span></span>
-          <select class="custom-select" [(ngModel)]="positionCode" (ngModelChange)="onPositionSelect($event)">
+          <select
+            class="custom-select"
+            [(ngModel)]="positionCode"
+            (ngModelChange)="onPositionSelect($event)"
+          >
             <option value="" disabled>Chọn vai trò của bạn</option>
             <option *ngFor="let pos of positions" [value]="pos.name">{{ pos.name }}</option>
           </select>
         </div>
         @if (errors['positionCode']) {
-        <span class="error-message">{{ errors['positionCode'] }}</span>
+          <span class="error-message">{{ errors['positionCode'] }}</span>
         }
       </div>
 
       <div class="form-group">
-        <app-avatar-upload-button label="Ảnh đại diện" buttonText="Tải ảnh lên"
-          acceptFormats="image/png,image/jpeg,image/jpg" helperText="Định dạng .png, .jpeg, .jpg" [required]="true"
-          (fileChange)="onAvatarChange($event)"></app-avatar-upload-button>
+        <app-avatar-upload-button
+          label="Ảnh đại diện"
+          buttonText="Tải ảnh lên"
+          acceptFormats="image/png,image/jpeg,image/jpg"
+          helperText="Định dạng .png, .jpeg, .jpg"
+          [required]="true"
+          (fileChange)="onAvatarChange($event)"
+        ></app-avatar-upload-button>
         <span class="error-message" *ngIf="errors['avatar']">{{ errors['avatar'] }}</span>
       </div>
 
       <div class="form-group">
-        <app-avatar-upload-button label="CV" buttonText="Tải file lên" acceptFormats=".pdf,.doc,.docx"
-          helperText="Định dạng .docx, .pdf" [required]="true"
-          (fileChange)="onCvChange($event)"></app-avatar-upload-button>
+        <app-avatar-upload-button
+          label="CV"
+          buttonText="Tải file lên"
+          acceptFormats=".pdf,.doc,.docx"
+          helperText="Định dạng .docx, .pdf"
+          [required]="true"
+          (fileChange)="onCvChange($event)"
+        ></app-avatar-upload-button>
         <span class="error-message" *ngIf="errors['cv']">{{ errors['cv'] }}</span>
       </div>
 
       @if (isInternPosition()) {
-      <div class="form-group">
-        <div class="date-picker-field">
-          <span class="date-picker-label">Ngày bắt đầu thực tập <span class="required-star">*</span></span>
-          <app-date-picker placeholder="DD/MM/YYYY" [size]="'large'" [(ngModel)]="internshipStartDate"
-            (dateChange)="onInternshipStartDateChange($event)" (keydown)="onlyDateInput($event)">
-          </app-date-picker>
+        <div class="form-group">
+          <div class="date-picker-field">
+            <span class="date-picker-label"
+              >Ngày bắt đầu thực tập <span class="required-star">*</span></span
+            >
+            <app-date-picker
+              placeholder="DD/MM/YYYY"
+              [size]="'large'"
+              [(ngModel)]="internshipStartDate"
+              (dateChange)="onInternshipStartDateChange($event)"
+              (keydown)="onlyDateInput($event)"
+            >
+            </app-date-picker>
+          </div>
+          @if (errors['internshipStartDate']) {
+            <span class="error-message">{{ errors['internshipStartDate'] }}</span>
+          }
         </div>
-        @if (errors['internshipStartDate']) {
-        <span class="error-message">{{ errors['internshipStartDate'] }}</span>
-        }
-      </div>
       }
 
       <!-- Ngày kết thúc thực tập -->
       @if (isInternPosition()) {
-      <div class="form-group">
-        <div class="date-picker-field">
-          <span class="date-picker-label">Ngày kết thúc thực tập <span class="required-star">*</span></span>
-          <app-date-picker placeholder="DD/MM/YYYY" [size]="'large'" [(ngModel)]="internshipEndDate"
-            (dateChange)="onInternshipEndDateChange($event)" (keydown)="onlyDateInput($event)">
-          </app-date-picker>
+        <div class="form-group">
+          <div class="date-picker-field">
+            <span class="date-picker-label"
+              >Ngày kết thúc thực tập <span class="required-star">*</span></span
+            >
+            <app-date-picker
+              placeholder="DD/MM/YYYY"
+              [size]="'large'"
+              [(ngModel)]="internshipEndDate"
+              (dateChange)="onInternshipEndDateChange($event)"
+              (keydown)="onlyDateInput($event)"
+            >
+            </app-date-picker>
+          </div>
+          @if (errors['internshipEndDate']) {
+            <span class="error-message">{{ errors['internshipEndDate'] }}</span>
+          }
         </div>
-        @if (errors['internshipEndDate']) {
-        <span class="error-message">{{ errors['internshipEndDate'] }}</span>
-        }
-      </div>
       }
     </div>
 
@@ -135,9 +189,13 @@
         <input type="checkbox" [(ngModel)]="agreeTerms" (change)="onTermsChange()" />
         <span class="terms-text">
           Tôi đồng ý với
-          <a href="#" class="terms-link" (click)="openTermsPopup($event)">Điều khoản sử dụng dịch vụ</a>
+          <a href="#" class="terms-link" (click)="openTermsPopup($event)"
+            >Điều khoản sử dụng dịch vụ</a
+          >
           và
-          <a href="#" class="terms-link" (click)="openTermsPopup($event)">Chính sách quyền riêng tư</a>
+          <a href="#" class="terms-link" (click)="openTermsPopup($event)"
+            >Chính sách quyền riêng tư</a
+          >
           của Intern Hub
         </span>
       </label>
@@ -145,12 +203,22 @@
     </div>
 
     <div class="button-section step-buttons">
-      <app-button-container content="Quay lại" size="md" backgroundColor="var(--neutral-color-10)"
-        color="var(--brand-500)" border="1px solid var(--brand-500)" width="100%"
-        (buttonClick)="goBackToLogin()"></app-button-container>
-      <app-button-container content="Tiếp theo" size="md"
-        [backgroundColor]="agreeTerms ? 'var(--brand-500)' : 'var(--neutral-color-200)'" width="100%"
-        (buttonClick)="goToStep2()"></app-button-container>
+      <app-button-container
+        content="Quay lại"
+        size="md"
+        backgroundColor="var(--neutral-color-10)"
+        color="var(--brand-500)"
+        border="1px solid var(--brand-500)"
+        width="100%"
+        (buttonClick)="goBackToLogin()"
+      ></app-button-container>
+      <app-button-container
+        content="Tiếp theo"
+        size="md"
+        [backgroundColor]="agreeTerms ? 'var(--brand-500)' : 'var(--neutral-color-200)'"
+        width="100%"
+        (buttonClick)="goToStep2()"
+      ></app-button-container>
     </div>
   </div>
 
@@ -159,8 +227,13 @@
     <div class="form-row">
       <!-- EMAIL -->
       <div class="form-group">
-        <app-input-text headerInput="Email FPT" [(value)]="email" (valueChange)="onEmailInput($event)"
-          placeholder="example@fpt.com" [required]="true">
+        <app-input-text
+          headerInput="Email FPT"
+          [(value)]="email"
+          (valueChange)="onEmailInput($event)"
+          placeholder="example@fpt.com"
+          [required]="true"
+        >
         </app-input-text>
 
         <span class="error-message" *ngIf="errors['email']">
@@ -170,8 +243,12 @@
 
       <!-- FULL NAME -->
       <div class="form-group">
-        <app-input-text headerInput="Họ & Tên" [(value)]="fullName" (valueChange)="onFullNameInput($event)"
-          placeholder="Nhập họ tên">
+        <app-input-text
+          headerInput="Họ & Tên"
+          [(value)]="fullName"
+          (valueChange)="onFullNameInput($event)"
+          placeholder="Nhập họ tên"
+        >
         </app-input-text>
 
         <span class="error-message" *ngIf="errors['fullName']">
@@ -181,8 +258,13 @@
 
       <!-- CCCD -->
       <div class="form-group">
-        <app-input-text headerInput="Số CCCD" [(value)]="idNumber" (valueChange)="onIdNumberInput($event)"
-          (keydown)="onlyNumber($event)" placeholder="Nhập 12 số">
+        <app-input-text
+          headerInput="Số CCCD"
+          [(value)]="idNumber"
+          (valueChange)="onIdNumberInput($event)"
+          (keydown)="onlyNumber($event)"
+          placeholder="Nhập 12 số"
+        >
         </app-input-text>
 
         <span class="error-message" *ngIf="errors['idNumber']">
@@ -200,24 +282,42 @@
       </div>
 
       <div class="form-group form-row-full">
-        <app-input-text headerInput="Địa chỉ" [value]="address" [readonly]="true" [required]="true"></app-input-text>
+        <app-input-text
+          headerInput="Địa chỉ"
+          [value]="address"
+          [readonly]="true"
+          [required]="true"
+        ></app-input-text>
       </div>
 
       <div class="form-group">
-        <app-input-text headerInput="Số điện thoại" [value]="phoneNumber" [readonly]="true"
-          [required]="true"></app-input-text>
+        <app-input-text
+          headerInput="Số điện thoại"
+          [value]="phoneNumber"
+          [readonly]="true"
+          [required]="true"
+        ></app-input-text>
       </div>
 
       <div class="form-group">
-        <app-input-text headerInput="Vị trí" [value]="positionCode" [readonly]="true"
-          [required]="true"></app-input-text>
+        <app-input-text
+          headerInput="Vị trí"
+          [value]="positionCode"
+          [readonly]="true"
+          [required]="true"
+        ></app-input-text>
       </div>
 
       <div class="form-group">
         <div class="readonly-file-field">
           <span class="readonly-file-label">Ảnh đại diện <span class="required-star">*</span></span>
           <div class="readonly-file-preview">
-            <img *ngIf="avatarPreviewUrl" [src]="avatarPreviewUrl" alt="Avatar preview" class="avatar-preview-img" />
+            <img
+              *ngIf="avatarPreviewUrl"
+              [src]="avatarPreviewUrl"
+              alt="Avatar preview"
+              class="avatar-preview-img"
+            />
             <span class="file-name" *ngIf="avatarFile">{{ avatarFile.name }}</span>
           </div>
         </div>
@@ -235,7 +335,9 @@
 
       <div class="form-group" *ngIf="isInternPosition()">
         <div class="readonly-file-field">
-          <span class="readonly-file-label">Ngày bắt đầu thực tập <span class="required-star">*</span></span>
+          <span class="readonly-file-label"
+            >Ngày bắt đầu thực tập <span class="required-star">*</span></span
+          >
           <div class="readonly-file-value">
             <span class="file-name">{{ formatDateToDisplayStr(internshipStartDate) }}</span>
           </div>
@@ -244,7 +346,9 @@
 
       <div class="form-group" *ngIf="isInternPosition()">
         <div class="readonly-file-field">
-          <span class="readonly-file-label">Ngày kết thúc thực tập <span class="required-star">*</span></span>
+          <span class="readonly-file-label"
+            >Ngày kết thúc thực tập <span class="required-star">*</span></span
+          >
           <div class="readonly-file-value">
             <span class="file-name">{{ formatDateToDisplayStr(internshipEndDate) }}</span>
           </div>
@@ -259,32 +363,48 @@
     </div>
 
     <div class="button-section step2-buttons">
-      <app-button-container content="Quay lại" size="md" backgroundColor="var(--neutral-color-10)"
-        color="var(--brand-500)" border="1px solid var(--brand-500)" width="100%"
-        (buttonClick)="goBackToStep1()"></app-button-container>
-      <app-button-container [content]="isLoading ? 'Đang xử lý...' : 'Xác nhận'" size="md"
-        backgroundColor="var(--brand-500)" color="var(--neutral-color-10)" border="1px solid var(--brand-500)"
-        width="100%" (buttonClick)="confirmAndSubmit()"></app-button-container>
+      <app-button-container
+        content="Quay lại"
+        size="md"
+        backgroundColor="var(--neutral-color-10)"
+        color="var(--brand-500)"
+        border="1px solid var(--brand-500)"
+        width="100%"
+        (buttonClick)="goBackToStep1()"
+      ></app-button-container>
+      <app-button-container
+        [content]="isLoading ? 'Đang xử lý...' : 'Xác nhận'"
+        size="md"
+        backgroundColor="var(--brand-500)"
+        color="var(--neutral-color-10)"
+        border="1px solid var(--brand-500)"
+        width="100%"
+        (buttonClick)="confirmAndSubmit()"
+      ></app-button-container>
     </div>
   </div>
 
   <div class="success-section" *ngIf="currentStep === 3">
     <div class="success-card">
       <div class="success-icon">
-        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="40" cy="40" r="36" fill="#4ADE80" opacity="0.2" />
-          <circle cx="40" cy="40" r="28" fill="#22C55E" />
-          <path d="M28 40L36 48L52 32" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
+        <i class="dsi dsi-check-circle-solid dsi-theme-green-600"></i>
       </div>
       <h2 class="success-title">Đăng ký thành công</h2>
       <div class="success-button">
-        <app-button-container content="Quay lại đăng nhập" size="md" backgroundColor="var(--brand-500)" width="auto"
-          (buttonClick)="goBackToLogin()"></app-button-container>
+        <app-button-container
+          content="Quay lại đăng nhập"
+          size="md"
+          backgroundColor="var(--brand-500)"
+          width="auto"
+          (buttonClick)="goBackToLogin()"
+        ></app-button-container>
       </div>
     </div>
   </div>
 </div>
 
-<app-terms-popup *ngIf="showTermsPopup" (closePopup)="onTermsAccepted()"
-  (acceptTerms)="onTermsAccepted()"></app-terms-popup>
+<app-terms-popup
+  *ngIf="showTermsPopup"
+  (closePopup)="onTermsAccepted()"
+  (acceptTerms)="onTermsAccepted()"
+></app-terms-popup>
