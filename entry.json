@@ -1,0 +1,439 @@
+{
+  "name": "auth",
+  "shared": [
+    {
+      "packageName": "@angular/common",
+      "outFileName": "_angular_common.dGj92xfk4I-dev.js",
+      "requiredVersion": "auto",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "@angular/common/http",
+      "outFileName": "_angular_common_http.SRVTggMsaC-dev.js",
+      "requiredVersion": "21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "@angular/core",
+      "outFileName": "_angular_core.P6QIGSvUSd-dev.js",
+      "requiredVersion": "21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "@angular/core/primitives/di",
+      "outFileName": "_angular_core_primitives_di.Csvlm8aS3M-dev.js",
+      "requiredVersion": "21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "@angular/core/primitives/signals",
+      "outFileName": "_angular_core_primitives_signals.-Yp37S55TI-dev.js",
+      "requiredVersion": "21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "@angular/core/rxjs-interop",
+      "outFileName": "_angular_core_rxjs_interop.GIbk3UjqRP-dev.js",
+      "requiredVersion": "21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "@angular/forms",
+      "outFileName": "_angular_forms.n1WBYbLlUz-dev.js",
+      "requiredVersion": "21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "@angular/platform-browser",
+      "outFileName": "_angular_platform_browser.Xl0LLlzU5b-dev.js",
+      "requiredVersion": "21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "@angular/router",
+      "outFileName": "_angular_router.tC2fb0vdjM-dev.js",
+      "requiredVersion": "21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "@goat-bravos/intern-hub-layout",
+      "outFileName": "_goat_bravos_intern_hub_layout.xB_AMwa3UJ-dev.js",
+      "requiredVersion": "^4.0.3",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "4.0.3"
+    },
+    {
+      "packageName": "@goat-bravos/shared-lib-client",
+      "outFileName": "_goat_bravos_shared_lib_client.9d5WT2XIh8-dev.js",
+      "requiredVersion": "^1.0.1",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "1.0.1"
+    },
+    {
+      "packageName": "dynamic-ds",
+      "outFileName": "dynamic_ds.SsXbHPOjvg-dev.js",
+      "requiredVersion": "auto",
+      "singleton": true,
+      "strictVersion": false,
+      "version": "1.0.5"
+    },
+    {
+      "packageName": "ng-zorro-antd",
+      "outFileName": "ng_zorro_antd.JbYN66cFdo-dev.js",
+      "requiredVersion": "auto",
+      "singleton": true,
+      "strictVersion": false,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/button",
+      "outFileName": "ng_zorro_antd_button.JNMtG46LUA-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/cdk/resize-observer",
+      "outFileName": "ng_zorro_antd_cdk_resize_observer.AGqGONV9sr-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/animation",
+      "outFileName": "ng_zorro_antd_core_animation.hsRwP4QuK1-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/color",
+      "outFileName": "ng_zorro_antd_core_color.CpsltbrfYK-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/config",
+      "outFileName": "ng_zorro_antd_core_config.guvLQ3_jfz-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/environments",
+      "outFileName": "ng_zorro_antd_core_environments.MfP_JU_YNd-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/form",
+      "outFileName": "ng_zorro_antd_core_form.wnGzzAn5r5-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/logger",
+      "outFileName": "ng_zorro_antd_core_logger.MKWExor7Ko-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/outlet",
+      "outFileName": "ng_zorro_antd_core_outlet.gZAfKvWdxW-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/overlay",
+      "outFileName": "ng_zorro_antd_core_overlay._gcwvPkt5V-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/polyfill",
+      "outFileName": "ng_zorro_antd_core_polyfill.HeHgrNDtj7-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/time",
+      "outFileName": "ng_zorro_antd_core_time.eEhQWOS8fI-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/transition-patch",
+      "outFileName": "ng_zorro_antd_core_transition_patch.aymsE9RMx3-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/util",
+      "outFileName": "ng_zorro_antd_core_util.w4yd29ZHx--dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/core/wave",
+      "outFileName": "ng_zorro_antd_core_wave.CEOogEGlhZ-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/date-picker",
+      "outFileName": "ng_zorro_antd_date_picker.KNaNmlxtLk-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/i18n",
+      "outFileName": "ng_zorro_antd_i18n.He-xpUbp2e-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/icon",
+      "outFileName": "ng_zorro_antd_icon.C2Dw7AAt5H-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/space",
+      "outFileName": "ng_zorro_antd_space.zchc5kuAdw-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "ng-zorro-antd/time-picker",
+      "outFileName": "ng_zorro_antd_time_picker.V79dprgAYK-dev.js",
+      "requiredVersion": "^21.1.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "packageName": "rxjs",
+      "outFileName": "rxjs.MdSrUxFqBz-dev.js",
+      "requiredVersion": "~7.8.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "7.8.2"
+    },
+    {
+      "packageName": "rxjs/operators",
+      "outFileName": "rxjs_operators.IQHW11UD2y-dev.js",
+      "requiredVersion": "~7.8.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "7.8.2"
+    },
+    {
+      "packageName": "tslib",
+      "outFileName": "tslib.nV0hwHclqK-dev.js",
+      "requiredVersion": "^2.3.0",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "2.8.1"
+    },
+    {
+      "packageName": "@angular/common/locales/vi",
+      "outFileName": "_angular_common_locales_vi.xNm3oz7w7m-dev.js",
+      "requiredVersion": "auto",
+      "singleton": true,
+      "strictVersion": true,
+      "version": "21.1.0"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-IE2S7NZU",
+      "outFileName": "chunk-IE2S7NZU.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-UD2VCXBH",
+      "outFileName": "chunk-UD2VCXBH.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-BIBHFUGV",
+      "outFileName": "chunk-BIBHFUGV.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-W2EYZM3E",
+      "outFileName": "chunk-W2EYZM3E.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-JRJEUUXX",
+      "outFileName": "chunk-JRJEUUXX.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-4C4EV5NR",
+      "outFileName": "chunk-4C4EV5NR.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-44JL7CN5",
+      "outFileName": "chunk-44JL7CN5.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-Z6FJUSQI",
+      "outFileName": "chunk-Z6FJUSQI.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-CWXD5FUA",
+      "outFileName": "chunk-CWXD5FUA.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-5BUR6CSS",
+      "outFileName": "chunk-5BUR6CSS.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-URFRUW4D",
+      "outFileName": "chunk-URFRUW4D.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-LCJU4ATP",
+      "outFileName": "chunk-LCJU4ATP.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-F7HAP3NI",
+      "outFileName": "chunk-F7HAP3NI.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-YJJPFGJY",
+      "outFileName": "chunk-YJJPFGJY.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-I4ZUSM75",
+      "outFileName": "chunk-I4ZUSM75.js"
+    },
+    {
+      "singleton": false,
+      "strictVersion": false,
+      "version": "0.0.0",
+      "requiredVersion": "0.0.0",
+      "packageName": "@nf-internal/chunk-EIB7IA3J",
+      "outFileName": "chunk-EIB7IA3J.js"
+    }
+  ],
+  "exposes": [
+    {
+      "key": "./routes",
+      "outFileName": "routes.js",
+      "dev": {
+        "entryPoint": "D:/Projects/InternHub/Intern-Hub-Auth-Frontend/src/app/app.routes.ts"
+      }
+    }
+  ],
+  "buildNotificationsEndpoint": "/@angular-architects/native-federation:build-notifications"
+}
