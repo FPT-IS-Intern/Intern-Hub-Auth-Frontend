@@ -24,6 +24,7 @@ export class LoginFormComponent {
     password = signal('');
     error = signal<string | null>(null);
     isLoading = signal(false);
+    showPassword = signal(false);
 
     // Logic kiểm tra nút bấm
     checkInputRequired = computed(() => this.username().trim() === '' || this.password().trim() === '');
@@ -59,6 +60,6 @@ export class LoginFormComponent {
     }
 
     togglePassword() {
-        // Toggle password visibility
+        this.showPassword.update(v => !v);
     }
 }

@@ -18,9 +18,9 @@
           <app-input-text
             headerInput="Mật khẩu"
             placeholder="Nhập mật khẩu"
-            typeInput="password"
+            [typeInput]="showPassword() ? 'text' : 'password'"
             [required]="true"
-            icon="dsi-eye-line"
+            [icon]="showPassword() ? 'dsi-eye-off-line' : 'dsi-eye-line'"
             (iconClick)="togglePassword()"
             [(value)]="password"
           ></app-input-text>
