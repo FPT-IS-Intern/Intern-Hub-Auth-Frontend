@@ -61,7 +61,7 @@
       <!-- PHONE -->
       <div class="form-group">
         <app-input-text headerInput="Số điện thoại" [(value)]="phoneNumber" (valueChange)="onPhoneNumberInput($event)"
-          (keydown)="onlyNumber($event)" placeholder="Nhập số điện thoại" [maxLength]="12" [showLimit]="true" [errorMessage]="errors['phoneNumber'] || ''">
+          (keydown)="onlyNumber($event)" placeholder="Nhập số điện thoại" [maxLength]="10" [showLimit]="true" [errorMessage]="errors['phoneNumber'] || ''">
         </app-input-text>
       </div>
 
@@ -90,7 +90,7 @@
       </div>
 
       <div class="form-group">
-        <app-avatar-upload-button label="CV" buttonText="Tải file lên" acceptFormats=".pdf,.doc,.docx"
+        <app-avatar-upload-button label="CV" buttonText="Tải file lên" acceptFormats=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
           helperText="Định dạng .docx, .pdf" [required]="true"
           (fileChange)="onCvChange($event)"></app-avatar-upload-button>
         @if (errors['cv']) {

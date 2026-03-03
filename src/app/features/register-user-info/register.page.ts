@@ -322,9 +322,9 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   }
   onPhoneNumberPaste(event: ClipboardEvent): void {
     const pasted = event.clipboardData?.getData('text') || '';
-    if (!/^[0-9+]+$/.test(pasted)) {
+    if (!/^[0-9]+$/.test(pasted)) {
       event.preventDefault();
-      this.errors['phoneNumber'] = 'Số điện thoại phải có 10 số bắt đầu bằng 0 hoặc +84';
+      this.errors['phoneNumber'] = 'Số điện thoại phải có đúng 10 số và bắt đầu bằng 0';
     }
   }
   onBirthDatePaste(event: ClipboardEvent): void {
@@ -411,25 +411,23 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onPhoneNumberInput(value: string): void {
-    if (value.length > 12) {
-      value = value.substring(0, 12);
+    if (value.length > 10) {
+      value = value.substring(0, 10);
     }
     this.phoneNumber = value;
     if (!value) {
       this.errors['phoneNumber'] = 'Số điện thoại không được để trống';
     } else if (/^0\d{9}$/.test(value)) {
       delete this.errors['phoneNumber'];
-    } else if (/^\+84\d{9}$/.test(value)) {
-      delete this.errors['phoneNumber'];
     } else {
-      this.errors['phoneNumber'] = 'Số điện thoại phải có 10 số bắt đầu bằng 0 hoặc +84';
+      this.errors['phoneNumber'] = 'Số điện thoại phải có đúng 10 số và bắt đầu bằng 0';
     }
   }
 
   onPhoneKeydown(event: KeyboardEvent): void {
     const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
     if (allowedKeys.includes(event.key)) return;
-    if (!/^[0-9+]$/.test(event.key)) {
+    if (!/^[0-9]$/.test(event.key)) {
       event.preventDefault();
     }
   }
@@ -740,11 +738,11 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       this.errors['address'] = 'Địa chỉ phải bao gồm cả số nhà/ngõ và tên đường.';
     }
 
-    // Số điện thoại: 10 số bắt đầu bằng 0 hoặc +84
+    // Số điện thoại: đúng 10 số bắt đầu bằng 0
     if (!this.phoneNumber.trim()) {
       this.errors['phoneNumber'] = 'Số điện thoại không được để trống';
-    } else if (!/^(0\d{9}|\+84\d{9})$/.test(this.phoneNumber)) {
-      this.errors['phoneNumber'] = 'Số điện thoại phải có 10 số bắt đầu bằng 0 hoặc +84';
+    } else if (!/^0\d{9}$/.test(this.phoneNumber)) {
+      this.errors['phoneNumber'] = 'Số điện thoại phải có đúng 10 số và bắt đầu bằng 0';
     }
 
     // Vị trí
