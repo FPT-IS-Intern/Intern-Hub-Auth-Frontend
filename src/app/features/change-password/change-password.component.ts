@@ -27,6 +27,8 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   isLoading = signal<boolean>(false);
   error = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+  showNewPassword = signal(false);
+  showConfirmPassword = signal(false);
 
   isSubmitDisabled = computed(() => {
     return !this.newPassword() || !this.confirmPassword() || this.isLoading();
@@ -62,6 +64,14 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
 
   checkInputRequired(): boolean {
     return this.isSubmitDisabled();
+  }
+
+  toggleNewPassword() {
+    this.showNewPassword.update(v => !v);
+  }
+
+  toggleConfirmPassword() {
+    this.showConfirmPassword.update(v => !v);
   }
 
   async handleSubmit() {

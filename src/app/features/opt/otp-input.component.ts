@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormArray, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
-import { PopUpConfirmComponent } from '@goat-bravos/intern-hub-layout';
+import { PopUpInfoComponent } from '@goat-bravos/intern-hub-layout';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { PasswordResetStateService } from '../../services/password-reset-state.service';
@@ -11,7 +11,7 @@ import { firstValueFrom } from 'rxjs';
 @Component({
     selector: 'app-otp-input',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, ErrorMessageComponent, PopUpConfirmComponent],
+    imports: [CommonModule, ReactiveFormsModule, ErrorMessageComponent, PopUpInfoComponent],
     templateUrl: './otp-input.component.html',
     styleUrls: ['./otp-input.component.scss']
 })
@@ -35,10 +35,10 @@ export class OtpInputComponent implements OnInit, OnDestroy {
     isCanResend = computed(() => this.countdown() === 0);
 
     async handleSubmit() {
-        if (!this.otpForm.valid || this.isCanResend()) {
-            this.error.set('Mã kích hoạt không chính xác hoặc đã hết hạn');
-            return;
-        }
+        // if (!this.otpForm.valid || this.isCanResend()) {
+        //     this.error.set('Mã kích hoạt không chính xác hoặc đã hết hạn');
+        //     return;
+        // }
 
         const requestId = this.passwordResetState.requestId();
         if (!requestId) {
@@ -113,26 +113,26 @@ export class OtpInputComponent implements OnInit, OnDestroy {
     private handleError(code?: string, message?: string) {
         switch (code) {
             case 'auth.exception.otp_expired':
-                this.error.set('Mã xác thực đã hết hạn. Vui lòng gửi lại mã.');
+                this.error.set('OTP không chính xác hoặc đã hết hạn');
                 break;
             case 'auth.exception.otp_invalid':
-                this.error.set('Mã xác thực không chính xác.');
+                this.error.set('OTP không chính xác hoặc đã hết hạn');
                 break;
             case 'auth.exception.otp_resend_too_soon':
-                this.error.set('Vui lòng đợi trước khi gửi lại mã xác thực.');
+                this.error.set('Vui lòng đợi trước khi gửi lại OTP.');
                 break;
             case 'auth.exception.otp_max_attempts':
                 this.popup.set({
                     show: true,
-                    title: 'Xác thực thất bại',
-                    content: 'Bạn đã nhập sai mã xác thực quá nhiều lần. Vui lòng liên hệ bộ phận IT hoặc thử lại sau 24h.'
+                    title: 'Vui lòng liên hệ phòng IT',
+                    content: 'Bạn đã nhập sai OTP quá nhiều lần. Vui lòng liên hệ bộ phận IT để được hỗ trợ.'
                 });
                 break;
             case 'auth.exception.otp_max_resend':
                 this.popup.set({
                     show: true,
-                    title: 'Xác thực thất bại',
-                    content: 'Bạn đã yêu cầu gửi mã xác thực quá nhiều lần, vui lòng liên hệ bộ phận IT hoặc thử lại sau 24h'
+                    title: 'Vui lòng liên hệ phòng IT',
+                    content: 'Bạn đã yêu cầu gửi OTP quá nhiều lần. Vui lòng liên hệ bộ phận IT để được hỗ trợ.'
                 });
                 break;
             default:
@@ -143,6 +143,8 @@ export class OtpInputComponent implements OnInit, OnDestroy {
 
     closePopup() {
         this.popup.update(state => ({ ...state, show: false }));
+        // redirect to login page
+        this.router.navigate(['/auth/login']);
     }
 
     onConfirm() {
