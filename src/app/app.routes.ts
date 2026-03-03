@@ -17,7 +17,7 @@ const buildAuthRoutes = (): Routes => [
   {
     path: 'register',
     loadComponent: () =>
-      import('./features/register-user-info/register.page').then((m) => m.RegisterPage),
+      import('./features/register-user-info/register/register.page').then((m) => m.RegisterPage),
   },
   {
     path: 'verify-otp',

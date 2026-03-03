@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -11,11 +11,11 @@ import {
   DatePickerComponent,
   InputTextComponent,
 } from '@goat-bravos/intern-hub-layout';
-import { ProcessStep, ProcessStepComponent } from './process-step.component';
-import { TermsPopupComponent } from './terms-popup.component';
-import { RegisterUserService } from '../../services/register-user.service';
-import { PositionResponse } from "../../services/register-user.service";
-import { RegisterUserRequest } from '../../models/register.model';
+import { ProcessStep, ProcessStepComponent } from '../process-step/process-step.component';
+import { TermsPopupComponent } from '../terms-popup.component';
+import { RegisterUserService } from '../../../services/register-user.service';
+import { PositionResponse } from "../../../services/register-user.service";
+import { RegisterUserRequest } from '../../../models/register.model';
 
 @Component({
   standalone: true,
@@ -33,11 +33,10 @@ import { RegisterUserRequest } from '../../models/register.model';
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
 })
-export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
+export class RegisterPage implements OnInit, OnDestroy {
   private readonly registerUserService = inject(RegisterUserService);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
-  private readonly elementRef = inject(ElementRef);
 
   positions: PositionResponse[] = [];
   private inactivityTimer: ReturnType<typeof setTimeout> | null = null;
@@ -46,71 +45,6 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit() {
     this.loadPositions();
     this.startInactivityTimer();
-  }
-
-  ngAfterViewInit(): void {
-    this.setupDatePickerAutoFormat();
-  }
-
-  /**
-   * Event delegation: bắt keydown và input trên tất cả input bên trong app-date-picker
-   * Để chỉ cho phép nhập số, tự động chèn '/' sau ngày và tháng
-   */
-  private setupDatePickerAutoFormat(): void {
-    const container = this.elementRef.nativeElement as HTMLElement;
-
-    // Chỉ cho phép nhập số và các phím điều khiển
-    container.addEventListener('keydown', (event: KeyboardEvent) => {
-      const target = event.target as HTMLInputElement;
-      if (target.tagName !== 'INPUT' || !target.closest('app-date-picker')) return;
-
-      const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab', 'Enter', 'Escape'];
-      if (allowedKeys.includes(event.key)) return;
-      if (event.ctrlKey || event.metaKey) return; // Cho phép Ctrl+C, Ctrl+V...
-
-      if (!/^[0-9]$/.test(event.key)) {
-        event.preventDefault();
-      }
-    }, true);
-
-    // Tự động chèn '/' sau ngày (2 số) và tháng (2 số tiếp)
-    container.addEventListener('input', (event: Event) => {
-      const target = event.target as HTMLInputElement;
-      if (target.tagName !== 'INPUT' || !target.closest('app-date-picker')) return;
-      this.formatDatePickerInput(target);
-    }, true);
-
-    // Chặn paste ký tự không hợp lệ
-    container.addEventListener('paste', (event: ClipboardEvent) => {
-      const target = event.target as HTMLInputElement;
-      if (target.tagName !== 'INPUT' || !target.closest('app-date-picker')) return;
-      const pasted = event.clipboardData?.getData('text') || '';
-      if (!/^[0-9/]*$/.test(pasted)) {
-        event.preventDefault();
-      }
-    }, true);
-  }
-
-  private formatDatePickerInput(input: HTMLInputElement): void {
-    let digits = input.value.replace(/[^0-9]/g, '');
-    if (digits.length > 8) digits = digits.substring(0, 8);
-
-    let formatted = '';
-    if (digits.length > 0) {
-      formatted = digits.substring(0, Math.min(2, digits.length));
-    }
-    if (digits.length > 2) {
-      formatted += '/' + digits.substring(2, Math.min(4, digits.length));
-    }
-    if (digits.length > 4) {
-      formatted += '/' + digits.substring(4, 8);
-    }
-
-    if (input.value !== formatted) {
-      input.value = formatted;
-      const pos = formatted.length;
-      setTimeout(() => input.setSelectionRange(pos, pos));
-    }
   }
 
   ngOnDestroy(): void {
@@ -224,12 +158,10 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  onlyDateInput(event: KeyboardEvent): void {
-    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
-    if (allowedKeys.includes(event.key)) return;
-    if (!/^[0-9]$/.test(event.key)) {
-      event.preventDefault();
-    }
+  /** Chặn nhập bàn phím vào date picker, chỉ cho chọn ngày từ lịch */
+  preventDateInput(event: KeyboardEvent): void {
+    if (event.key === 'Tab') return;
+    event.preventDefault();
   }
 
   /** Auto-format: chèn '/' sau ngày (2 ký tự) và tháng (5 ký tự) */
@@ -352,7 +284,7 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     }
     const emailRegex = /^[^\s@]+@fpt\.com$/i;
     if (!emailRegex.test(this.email)) {
-      this.errors['email'] = 'Email phải có đuôi @fpt.com';
+      this.errors['email'] = 'Sai định dạng(example@fpt.com)';
       return;
     }
     delete this.errors['email'];
@@ -389,11 +321,12 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
         .join(' ');
     }
     this.onFullNameInput(this.fullName);
+    this.changeDetectorRef.detectChanges();
   }
 
   onIdNumberInput(value: string): void {
     if (/\D/.test(value)) {
-      this.errors['idNumber'] = 'Vui lòng nhập đúng định dạng CCCD/CMND';
+      this.errors['idNumber'] = 'Nhập 12 số (đối với CCCD gắn chíp) hoặc 9 số (CMND cũ)';
       this.idNumber = value.replace(/\D/g, '').substring(0, 12);
       return;
     }
@@ -402,9 +335,9 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     }
     this.idNumber = value;
     if (!value) {
-      this.errors['idNumber'] = 'Vui lòng nhập đúng định dạng CCCD/CMND';
+      this.errors['idNumber'] = 'Nhập 12 số (đối với CCCD gắn chíp) hoặc 9 số (CMND cũ)';
     } else if (value.length !== 9 && value.length !== 12) {
-      this.errors['idNumber'] = 'Vui lòng nhập đúng định dạng CCCD/CMND';
+      this.errors['idNumber'] = 'Nhập 12 số (đối với CCCD gắn chíp) hoặc 9 số (CMND cũ)';
     } else {
       delete this.errors['idNumber'];
     }
@@ -464,6 +397,19 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     }
     this.birthDate = inputDate;
     delete this.errors['birthDate'];
+  }
+
+  onAddressBlur(): void {
+    if (this.address) {
+      this.address = this.address
+        .trim()
+        .split(/\s+/)
+        .filter(w => w.length > 0)
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+        .join(' ');
+    }
+    this.onAddressInput(this.address);
+    this.changeDetectorRef.detectChanges();
   }
 
   onAddressInput(value: string): void {
@@ -674,9 +620,12 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private validateForm(): boolean {
+    // Lưu lại lỗi file (format/size) trước khi reset
+    const savedAvatarError = this.errors['avatar'];
+    const savedCvError = this.errors['cv'];
     this.errors = {};
     this.validatePersonalInfo();
-    this.validateFiles();
+    this.validateFiles(savedAvatarError, savedCvError);
     this.validateInternship();
     if (!this.agreeTerms) {
       this.errors['agreeTerms'] = 'Bạn phải đồng ý với điều khoản sử dụng';
@@ -704,9 +653,9 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
 
     // CCCD/CMND: 9 hoặc 12 số
     if (!this.idNumber.trim()) {
-      this.errors['idNumber'] = 'Vui lòng nhập đúng định dạng CCCD/CMND';
+      this.errors['idNumber'] = 'Nhập 12 số (đối với CCCD gắn chíp) hoặc 9 số (CMND cũ)';
     } else if (this.idNumber.length !== 9 && this.idNumber.length !== 12) {
-      this.errors['idNumber'] = 'Vui lòng nhập đúng định dạng CCCD/CMND';
+      this.errors['idNumber'] = 'Nhập 12 số (đối với CCCD gắn chíp) hoặc 9 số (CMND cũ)';
     }
 
     // Ngày sinh: < ngày hiện tại và >= 16 tuổi
@@ -751,12 +700,12 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
-  private validateFiles(): void {
+  private validateFiles(savedAvatarError?: string, savedCvError?: string): void {
     if (!this.avatarFile) {
-      this.errors['avatar'] = 'Ảnh đại diện không được để trống';
+      this.errors['avatar'] = savedAvatarError || 'Ảnh đại diện không được để trống';
     }
     if (!this.cvFile) {
-      this.errors['cv'] = 'CV không được để trống';
+      this.errors['cv'] = savedCvError || 'CV không được để trống';
     }
   }
 

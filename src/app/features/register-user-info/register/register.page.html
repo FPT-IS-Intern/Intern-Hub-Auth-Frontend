@@ -25,6 +25,7 @@
 
       <div class="form-group">
         <app-input-text headerInput="Họ & Tên" [(value)]="fullName" (valueChange)="onFullNameInput($event)"
+          (focusout)="onFullNameBlur()"
           placeholder="Nhập họ tên" [required]="true" [maxLength]="100" [showLimit]="true" [errorMessage]="errors['fullName'] || ''">
         </app-input-text>
       </div>
@@ -43,7 +44,8 @@
             placeholder="DD/MM/YYYY"
             [size]="'default'"
             [(ngModel)]="birthDate"
-            (keydown)="onlyDateInput($event)"
+            (keydown)="preventDateInput($event)"
+            (paste)="$event.preventDefault()"
             (dateChange)="onBirthDateChange($event)">
           </app-date-picker>
         </div>
@@ -54,6 +56,7 @@
 
       <div class="form-group form-row-full">
         <app-input-text headerInput="Địa chỉ" [(value)]="address" (valueChange)="onAddressInput($event)"
+          (focusout)="onAddressBlur()"
           placeholder="Nhập địa chỉ" [required]="true" [maxLength]="250" [showLimit]="true" [errorMessage]="errors['address'] || ''">
         </app-input-text>
       </div>
@@ -103,7 +106,8 @@
         <div class="date-picker-field">
           <span class="date-picker-label">Ngày bắt đầu thực tập <span class="required-star">*</span></span>
           <app-date-picker placeholder="DD/MM/YYYY" [size]="'large'" [(ngModel)]="internshipStartDate"
-            (dateChange)="onInternshipStartDateChange($event)" (keydown)="onlyDateInput($event)">
+            (dateChange)="onInternshipStartDateChange($event)" (keydown)="preventDateInput($event)"
+            (paste)="$event.preventDefault()">
           </app-date-picker>
         </div>
         @if (errors['internshipStartDate']) {
@@ -118,7 +122,8 @@
         <div class="date-picker-field">
           <span class="date-picker-label">Ngày kết thúc thực tập <span class="required-star">*</span></span>
           <app-date-picker placeholder="DD/MM/YYYY" [size]="'large'" [(ngModel)]="internshipEndDate"
-            (dateChange)="onInternshipEndDateChange($event)" (keydown)="onlyDateInput($event)">
+            (dateChange)="onInternshipEndDateChange($event)" (keydown)="preventDateInput($event)"
+            (paste)="$event.preventDefault()">
           </app-date-picker>
         </div>
         @if (errors['internshipEndDate']) {
