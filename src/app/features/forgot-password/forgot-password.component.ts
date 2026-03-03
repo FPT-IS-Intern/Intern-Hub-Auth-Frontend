@@ -6,12 +6,12 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { PasswordResetStateService } from '../../services/password-reset-state.service';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
-import { InputTextComponent } from "@goat-bravos/intern-hub-layout";
+import { InputTextComponent, PopUpInfoComponent } from "@goat-bravos/intern-hub-layout";
 
 @Component({
     selector: 'app-forgot-password',
     standalone: true,
-    imports: [CommonModule, RouterLink, ErrorMessageComponent, InputTextComponent],
+    imports: [CommonModule, RouterLink, ErrorMessageComponent, InputTextComponent, PopUpInfoComponent],
     templateUrl: './forgot-password.component.html',
     styleUrls: ['./forgot-password.component.scss']
 })
@@ -26,6 +26,11 @@ export class ForgotPasswordComponent implements OnInit {
     email = signal('');
     error = signal<string | null>(null);
     isLoading = signal(false);
+    popup = signal({
+        show: false,
+        title: '',
+        content: ''
+    });
 
     checkInputRequired = computed(() => this.personalId().trim() === '' || this.email().trim() === '');
     isIdInvalid = computed(() => {
@@ -117,11 +122,23 @@ export class ForgotPasswordComponent implements OnInit {
                 this.error.set('Yêu cầu không tồn tại. Hãy kiểm tra lại.');
                 break;
             case 'auth.exception.otp_max_resend':
-                this.error.set('Bạn đã gửi mã xác thực quá nhiều lần. Hãy thử lại sau.');
+                this.popup.set({
+                    show: true,
+                    title: 'Vui lòng liên hệ phòng IT',
+                    content: 'Bạn đã gửi mã xác thực quá nhiều lần. Vui lòng liên hệ bộ phận IT để được hỗ trợ.'
+                });
                 break;
             default:
                 this.error.set(message || 'Có lỗi xảy ra, hãy thử lại.');
                 break;
         }
+    }
+
+    closePopup() {
+        this.popup.update(state => ({ ...state, show: false }));
+    }
+
+    onConfirm() {
+        this.closePopup();
     }
 }
