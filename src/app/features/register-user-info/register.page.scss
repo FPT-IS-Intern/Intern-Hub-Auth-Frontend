@@ -151,6 +151,10 @@
   margin-bottom: 16px;
 }
 
+:host ::ng-deep app-input-text .error-message {
+  color: var(--utility-500) !important;
+}
+
 .error-message.api-error {
   font-size: 14px;
   padding: 12px 16px;
