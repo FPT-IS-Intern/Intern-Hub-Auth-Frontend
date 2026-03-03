@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../services/auth.service';
+import { PasswordResetStateService } from '../../services/password-reset-state.service';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
 import { InputTextComponent } from "@goat-bravos/intern-hub-layout";
 import { MobileWarningComponent } from '../components/mobile-warning/mobile-warning.component';
@@ -18,6 +19,7 @@ import { MobileWarningComponent } from '../components/mobile-warning/mobile-warn
 export class LoginFormComponent {
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
+    private readonly passwordResetState = inject(PasswordResetStateService);
 
     // State quản lý bằng signals
     username = signal('');
@@ -48,15 +50,33 @@ export class LoginFormComponent {
                 localStorage.setItem('userId', res.data.userId);
                 this.router.navigate(['/homePage']);
             } else {
-                this.error.set(res.status?.message || 'Sai mật khẩu hoặc tên đăng nhập');
+                this.handleLoginError(res.status?.code, res.status?.message);
             }
         } catch (err: any) {
-            // Lỗi HTTP từ backend (401, 400, 500...)
+            const code = err?.error?.status?.code;
             const message = err?.error?.status?.message || err?.message || 'Lỗi kết nối server';
-            this.error.set(message);
+            this.handleLoginError(code, message);
         } finally {
             this.isLoading.set(false);
         }
+    }
+
+    private handleLoginError(code?: string, message?: string) {
+        if (code === 'auth.exception.first_login_required') {
+            this.passwordResetState.setReason('first-login');
+            this.passwordResetState.setEmail(this.username());
+            this.router.navigate(['/auth/forgot-password']);
+            return;
+        }
+
+        if (code === 'auth.exception.password_expired') {
+            this.passwordResetState.setReason('password-expired');
+            this.passwordResetState.setEmail(this.username());
+            this.router.navigate(['/auth/forgot-password']);
+            return;
+        }
+
+        this.error.set(message || 'Sai mật khẩu hoặc tên đăng nhập');
     }
 
     togglePassword() {

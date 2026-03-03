@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormArray, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
 import { PopUpConfirmComponent } from '@goat-bravos/intern-hub-layout';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { PasswordResetStateService } from '../../services/password-reset-state.service';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
     selector: 'app-otp-input',
@@ -15,15 +17,15 @@ import { AuthService } from '../../services/auth.service';
 })
 export class OtpInputComponent implements OnInit, OnDestroy {
 
-    private authService = inject(AuthService);
-    private router = inject(Router);
-    private route = inject(ActivatedRoute);
+    private readonly authService = inject(AuthService);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    readonly passwordResetState = inject(PasswordResetStateService);
 
     otpForm = new FormArray(Array(6).fill(0).map(() => new FormControl('', [Validators.required])));
-    countdown = signal(3);
+    countdown = signal(59);
     isLoading = signal(false);
     error = signal<string | null>(null);
-    showConfirm = false;
     private timer: any;
     popup = signal({
         show: false,
@@ -38,44 +40,105 @@ export class OtpInputComponent implements OnInit, OnDestroy {
             return;
         }
 
+        const requestId = this.passwordResetState.requestId();
+        if (!requestId) {
+            this.error.set('Phiên làm việc đã hết hạn. Vui lòng thử lại.');
+            this.router.navigate(['/auth/forgot-password']);
+            return;
+        }
+
         this.error.set(null);
+        const otp = this.otpForm.controls.map(c => c.value).join('');
 
         try {
             this.isLoading.set(true);
-            // Giả lập gọi API (thay bằng service thực tế của bạn)
-            await new Promise(resolve => setTimeout(resolve, 2000));
 
-            // Giả lập logic khi server báo sai quá nhiều lần
-            const isTooManyAttempts = false;
-            if (isTooManyAttempts) {
-                this.popup.set({
-                    show: true,
-                    title: 'Xác thực thất bại',
-                    content: 'Bạn đã yêu cầu gửi mã xác thực quá nhiều lần, vui lòng liên hệ bộ phận IT hoặc thử lại sau 24h'
-                });
+            const res = await firstValueFrom(this.authService.verifyOtp({
+                requestId,
+                otp,
+            }));
+
+            if (res.status?.code === 'success') {
+                // OTP xác thực thành công, chuyển đến trang đổi mật khẩu
+                this.router.navigate(['../change-password'], { relativeTo: this.route });
+            } else {
+                this.handleError(res.status?.code, res.status?.message);
             }
-
-            // Nếu thành công, chuyển hướng đến chức năng đặt lại mật khẩu
-            this.router.navigate(['../change-password'], { relativeTo: this.route });
-        } catch (err) {
-            this.error.set('Có lỗi xảy ra, vui lòng thử lại');
+        } catch (err: any) {
+            const code = err?.error?.status?.code;
+            const message = err?.error?.status?.message;
+            this.handleError(code, message);
         } finally {
             this.isLoading.set(false);
         }
     }
 
-    resendOtp() {
+    async resendOtp() {
         if (!this.isCanResend()) return;
 
-        this.isLoading.set(true);
+        const requestId = this.passwordResetState.requestId();
+        if (!requestId) {
+            this.error.set('Phiên làm việc đã hết hạn. Vui lòng thử lại.');
+            this.router.navigate(['/auth/forgot-password']);
+            return;
+        }
 
-        // Giả lập gọi API gửi lại OTP
-        setTimeout(() => {
-            this.otpForm.reset();
-            this.startCountdown();
+        this.isLoading.set(true);
+        this.error.set(null);
+
+        try {
+            const res = await firstValueFrom(this.authService.sendOtp({ requestId }));
+
+            if (res.status?.code === 'success') {
+                this.otpForm.reset();
+                if (res.data) {
+                    this.passwordResetState.setRemainingResendAttempts(res.data.remainingResendAttempts);
+                    this.passwordResetState.setNextResendInSeconds(res.data.nextResendInSeconds);
+                    this.startCountdown(res.data.nextResendInSeconds);
+                } else {
+                    this.startCountdown();
+                }
+            } else {
+                this.handleError(res.status?.code, res.status?.message);
+            }
+        } catch (err: any) {
+            const code = err?.error?.status?.code;
+            const message = err?.error?.status?.message;
+            this.handleError(code, message);
+        } finally {
             this.isLoading.set(false);
-            this.error.set(null);
-        }, 1000);
+        }
+    }
+
+    private handleError(code?: string, message?: string) {
+        switch (code) {
+            case 'auth.exception.otp_expired':
+                this.error.set('Mã xác thực đã hết hạn. Vui lòng gửi lại mã.');
+                break;
+            case 'auth.exception.otp_invalid':
+                this.error.set('Mã xác thực không chính xác.');
+                break;
+            case 'auth.exception.otp_resend_too_soon':
+                this.error.set('Vui lòng đợi trước khi gửi lại mã xác thực.');
+                break;
+            case 'auth.exception.otp_max_attempts':
+                this.popup.set({
+                    show: true,
+                    title: 'Xác thực thất bại',
+                    content: 'Bạn đã nhập sai mã xác thực quá nhiều lần. Vui lòng liên hệ bộ phận IT hoặc thử lại sau 24h.'
+                });
+                break;
+            case 'auth.exception.otp_max_resend':
+                this.popup.set({
+                    show: true,
+                    title: 'Xác thực thất bại',
+                    content: 'Bạn đã yêu cầu gửi mã xác thực quá nhiều lần, vui lòng liên hệ bộ phận IT hoặc thử lại sau 24h'
+                });
+                break;
+            default:
+                this.error.set(message || 'Có lỗi xảy ra, vui lòng thử lại');
+                break;
+        }
     }
 
     closePopup() {
@@ -84,12 +147,17 @@ export class OtpInputComponent implements OnInit, OnDestroy {
 
     onConfirm() {
         this.closePopup();
-        // this.resendOtp();
     }
 
-
     ngOnInit() {
-        this.startCountdown();
+        // Kiểm tra requestId, nếu không có thì redirect về trang xác thực
+        if (!this.passwordResetState.requestId()) {
+            this.router.navigate(['/auth/forgot-password']);
+            return;
+        }
+
+        const initialSeconds = this.passwordResetState.nextResendInSeconds();
+        this.startCountdown(initialSeconds > 0 ? initialSeconds : 59);
     }
 
     onInput(event: any, index: number) {
@@ -101,7 +169,6 @@ export class OtpInputComponent implements OnInit, OnDestroy {
         if (val && index < 5) {
             setTimeout(() => document.getElementById(`otp-${index + 1}`)?.focus(), 10);
         }
-
     }
 
     onKeyDown(event: KeyboardEvent, index: number) {
@@ -110,8 +177,8 @@ export class OtpInputComponent implements OnInit, OnDestroy {
         }
     }
 
-    startCountdown() {
-        this.countdown.set(59);
+    startCountdown(seconds: number = 59) {
+        this.countdown.set(seconds);
         if (this.timer) clearInterval(this.timer);
         this.timer = setInterval(() => {
             if (this.countdown() > 0) this.countdown.update(v => v - 1);
