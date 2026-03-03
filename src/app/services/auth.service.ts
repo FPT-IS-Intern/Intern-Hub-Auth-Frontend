@@ -1,6 +1,15 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { LoginRequest, LoginResponse, ForgotPassResponse } from '../models/login.model';
+import {
+  LoginRequest,
+  LoginResponse,
+  VerifyIdentityRequest,
+  VerifyIdentityResponse,
+  SendOtpRequest,
+  SendOtpResponse,
+  VerifyOtpRequest,
+  ResetPasswordRequest,
+} from '../models/login.model';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ResponseApi } from '@goat-bravos/shared-lib-client';
 import { getBaseUrl } from '../core/config/app-config';
@@ -23,17 +32,31 @@ export class AuthService {
     });
   }
 
-  forgotPassword(data: LoginRequest): Observable<ResponseApi<ForgotPassResponse>> {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      Accept: '*/*',
-      'X-Device-ID': this.getDeviceId(),
-    });
-
-    return this.httpClient.post<ResponseApi<ForgotPassResponse>>(
-      `${getBaseUrl()}/auth/forgot-password`,
+  verifyIdentity(data: VerifyIdentityRequest): Observable<ResponseApi<VerifyIdentityResponse>> {
+    return this.httpClient.post<ResponseApi<VerifyIdentityResponse>>(
+      `${getBaseUrl()}/auth/password-reset/verify-identity`,
       data,
-      { headers },
+    );
+  }
+
+  sendOtp(data: SendOtpRequest): Observable<ResponseApi<SendOtpResponse>> {
+    return this.httpClient.post<ResponseApi<SendOtpResponse>>(
+      `${getBaseUrl()}/auth/password-reset/send-otp`,
+      data,
+    );
+  }
+
+  verifyOtp(data: VerifyOtpRequest): Observable<ResponseApi<boolean>> {
+    return this.httpClient.post<ResponseApi<boolean>>(
+      `${getBaseUrl()}/auth/password-reset/verify-otp`,
+      data,
+    );
+  }
+
+  resetPassword(data: ResetPasswordRequest): Observable<ResponseApi<void>> {
+    return this.httpClient.post<ResponseApi<void>>(
+      `${getBaseUrl()}/auth/password-reset/reset-password`,
+      data,
     );
   }
 

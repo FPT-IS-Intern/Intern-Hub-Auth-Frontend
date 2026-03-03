@@ -1,9 +1,10 @@
-import { Component, signal, computed, inject } from '@angular/core';
+import { Component, signal, computed, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../services/auth.service';
+import { PasswordResetStateService } from '../../services/password-reset-state.service';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
 import { InputTextComponent } from "@goat-bravos/intern-hub-layout";
 
@@ -14,11 +15,12 @@ import { InputTextComponent } from "@goat-bravos/intern-hub-layout";
     templateUrl: './forgot-password.component.html',
     styleUrls: ['./forgot-password.component.scss']
 })
-export class ForgotPasswordComponent {
-    private authService = inject(AuthService);
-    private router = inject(Router);
-    private route = inject(ActivatedRoute);
-    
+export class ForgotPasswordComponent implements OnInit {
+    private readonly authService = inject(AuthService);
+    private readonly router = inject(Router);
+    private readonly route = inject(ActivatedRoute);
+    readonly passwordResetState = inject(PasswordResetStateService);
+
     // State quản lý bằng signals
     personalId = signal('');
     email = signal('');
@@ -31,6 +33,30 @@ export class ForgotPasswordComponent {
         return id !== '' && id.length !== 12;
     });
 
+    title = computed(() => {
+        switch (this.passwordResetState.reason()) {
+            case 'first-login': return 'Đăng nhập lần đầu';
+            case 'password-expired': return 'Làm mới mật khẩu';
+            default: return 'Quên mật khẩu';
+        }
+    });
+
+    subtitle = computed(() => {
+        switch (this.passwordResetState.reason()) {
+            case 'first-login': return 'Nhập thông tin để thiết lập mật khẩu mới';
+            case 'password-expired': return 'Mật khẩu của bạn đã hết hạn, vui lòng đặt lại';
+            default: return 'Nhập thông tin để khôi phục mật khẩu của bạn';
+        }
+    });
+
+    ngOnInit() {
+        // Pre-fill email nếu được chuyển từ trang login
+        const prefilledEmail = this.passwordResetState.email();
+        if (prefilledEmail) {
+            this.email.set(prefilledEmail);
+        }
+    }
+
     async handleSubmit() {
         if (this.checkInputRequired() || this.isIdInvalid()) {
             this.error.set('Sai Email tài khoản hoặc CCCD/CMND');
@@ -40,9 +66,62 @@ export class ForgotPasswordComponent {
         this.error.set(null);
         this.isLoading.set(true);
 
-        // khi xác thực thành công, chuyển hướng đến trang xác thực OTP
-        this.router.navigate(['../verify-otp'], { relativeTo: this.route });
+        try {
+            // Bước 1: Xác thực danh tính
+            const verifyRes = await firstValueFrom(this.authService.verifyIdentity({
+                username: this.email().trim(),
+                email: this.email().trim(),
+                nationalId: this.personalId().trim(),
+            }));
 
+            if (verifyRes.status?.code !== 'success' || !verifyRes.data?.requestId) {
+                this.handleError(verifyRes.status?.code, verifyRes.status?.message);
+                return;
+            }
+
+            const requestId = verifyRes.data.requestId;
+            this.passwordResetState.setRequestId(requestId);
+            this.passwordResetState.setEmail(this.email().trim());
+
+            // Bước 2: Gửi OTP
+            const otpRes = await firstValueFrom(this.authService.sendOtp({ requestId }));
+
+            if (otpRes.status?.code !== 'success') {
+                this.handleError(otpRes.status?.code, otpRes.status?.message);
+                return;
+            }
+
+            if (otpRes.data) {
+                this.passwordResetState.setRemainingResendAttempts(otpRes.data.remainingResendAttempts);
+                this.passwordResetState.setNextResendInSeconds(otpRes.data.nextResendInSeconds);
+            }
+
+            // Chuyển đến trang OTP
+            this.router.navigate(['../verify-otp'], { relativeTo: this.route });
+
+        } catch (err: any) {
+            const code = err?.error?.status?.code;
+            const message = err?.error?.status?.message;
+            this.handleError(code, message);
+        } finally {
+            this.isLoading.set(false);
+        }
     }
 
+    private handleError(code?: string, message?: string) {
+        switch (code) {
+            case 'auth.exception.identity_mismatch':
+                this.error.set('Thông tin xác thực không khớp. Hãy kiểm tra lại.');
+                break;
+            case 'auth.exception.request_not_found':
+                this.error.set('Yêu cầu không tồn tại. Hãy kiểm tra lại.');
+                break;
+            case 'auth.exception.otp_max_resend':
+                this.error.set('Bạn đã gửi mã xác thực quá nhiều lần. Hãy thử lại sau.');
+                break;
+            default:
+                this.error.set(message || 'Có lỗi xảy ra, hãy thử lại.');
+                break;
+        }
+    }
 }
