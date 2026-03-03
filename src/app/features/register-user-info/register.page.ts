@@ -2,8 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap, filter } from 'rxjs/operators';
+
 
 import {
   AvatarUploadButtonComponent,
@@ -44,40 +43,9 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   private inactivityTimer: ReturnType<typeof setTimeout> | null = null;
   private readonly INACTIVITY_TIMEOUT = 10 * 60 * 1000; // 10 phút
 
-  private emailCheck$ = new Subject<string>();
-  private emailCheckSub: Subscription | null = null;
-  isCheckingEmail = false;
-
   ngOnInit() {
     this.loadPositions();
     this.startInactivityTimer();
-    this.setupEmailCheck();
-  }
-
-  private setupEmailCheck(): void {
-    this.emailCheckSub = this.emailCheck$.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      filter(email => /^[^\s@]+@fpt\.com$/i.test(email)),
-      switchMap(email => {
-        this.isCheckingEmail = true;
-        return this.registerUserService.checkEmailExists(email);
-      })
-    ).subscribe({
-      next: (response) => {
-        this.isCheckingEmail = false;
-        if (response?.data === true) {
-          this.errors['email'] = 'Tài khoản đã được đăng ký';
-        } else if (!this.errors['email']) {
-          delete this.errors['email'];
-        }
-        this.changeDetectorRef.detectChanges();
-      },
-      error: () => {
-        this.isCheckingEmail = false;
-        this.changeDetectorRef.detectChanges();
-      }
-    });
   }
 
   ngAfterViewInit(): void {
@@ -147,7 +115,6 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     this.clearInactivityTimer();
-    this.emailCheckSub?.unsubscribe();
   }
 
   private startInactivityTimer(): void {
@@ -389,8 +356,6 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     delete this.errors['email'];
-    // Trigger debounced email duplicate check
-    this.emailCheck$.next(this.email);
   }
   onEmailBlur(): void {
     this.onEmailInput(this.email);
