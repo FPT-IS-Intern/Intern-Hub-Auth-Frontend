@@ -368,15 +368,24 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  readonly EMAIL_MAX_LENGTH = 254;
+
   onEmailInput(value: string): void {
+    if (value.length > this.EMAIL_MAX_LENGTH) {
+      value = value.substring(0, this.EMAIL_MAX_LENGTH);
+    }
     this.email = value.trim();
     if (!this.email) {
       this.errors['email'] = 'Email không được để trống';
       return;
     }
+    if (this.email.length > this.EMAIL_MAX_LENGTH) {
+      this.errors['email'] = `Email không được vượt quá ${this.EMAIL_MAX_LENGTH} ký tự`;
+      return;
+    }
     const emailRegex = /^[^\s@]+@fpt\.com$/i;
     if (!emailRegex.test(this.email)) {
-      this.errors['email'] = 'Sai định dạng email';
+      this.errors['email'] = 'Email phải có đuôi @fpt.com';
       return;
     }
     delete this.errors['email'];

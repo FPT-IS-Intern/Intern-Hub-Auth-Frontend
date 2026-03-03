@@ -19,7 +19,7 @@
     <div class="form-row">
       <div class="form-group">
         <app-input-text headerInput="Email FPT" [(value)]="email" (valueChange)="onEmailInput($event)"
-          placeholder="example@fpt.com" [required]="true" [errorMessage]="errors['email'] || ''">
+          placeholder="example@fpt.com" [required]="true" [maxLength]="254" [showLimit]="true" [errorMessage]="errors['email'] || ''">
         </app-input-text>
       </div>
 
@@ -145,12 +145,9 @@
     </div>
 
     <div class="button-section step-buttons">
-      <app-button-container content="Quay lại" size="md" backgroundColor="var(--neutral-color-10)"
-        color="var(--brand-500)" border="1px solid var(--brand-500)" width="100%"
-        (buttonClick)="goBackToLogin()"></app-button-container>
       <div class="next-btn-wrapper" [class.disabled]="!agreeTerms">
         <app-button-container class="next-btn" [class.next-btn--disabled]="!agreeTerms"
-          content="Tiếp theo" size="md" width="100%"
+          content="Tiếp theo" width="100%"
           [backgroundColor]="agreeTerms ? 'var(--brand-500)' : 'var(--neutral-color-200)'"
           [color]="agreeTerms ? 'var(--neutral-color-10)' : 'var(--neutral-color-400)'"
           (buttonClick)="agreeTerms && goToStep2()"></app-button-container>
