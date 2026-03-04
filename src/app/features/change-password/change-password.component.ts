@@ -7,6 +7,7 @@ import { InputTextComponent } from '@goat-bravos/intern-hub-layout';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
 import { AuthService } from '../../services/auth.service';
 import { PasswordResetStateService } from '../../services/password-reset-state.service';
+import { IdleTimeoutService } from '../../services/idle-timeout.service';
 
 @Component({
   selector: 'app-change-password',
@@ -16,11 +17,10 @@ import { PasswordResetStateService } from '../../services/password-reset-state.s
   styleUrls: ['./change-password.component.scss']
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
-  private readonly SESSION_TIMEOUT_MS = 10 * 60 * 1000; // 10 phút
-  private sessionTimer: any;
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   readonly passwordResetState = inject(PasswordResetStateService);
+  private readonly idleTimeout = inject(IdleTimeoutService);
 
   newPassword = signal<string>('');
   confirmPassword = signal<string>('');
@@ -48,18 +48,11 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
       this.router.navigate(['/auth/forgot-password']);
       return;
     }
-
-    // Tự động chuyển về trang đăng nhập sau 10 phút
-    this.sessionTimer = setTimeout(() => {
-      this.passwordResetState.clear();
-      this.router.navigate(['/auth/login']);
-    }, this.SESSION_TIMEOUT_MS);
+    this.idleTimeout.start();
   }
 
   ngOnDestroy() {
-    if (this.sessionTimer) {
-      clearTimeout(this.sessionTimer);
-    }
+    this.idleTimeout.stop();
   }
 
   checkInputRequired(): boolean {
@@ -105,8 +98,8 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
       }));
 
       if (res.status?.code === 'success') {
-        // Đổi mật khẩu thành công - xóa timer và state, chuyển về trang đăng nhập
-        if (this.sessionTimer) clearTimeout(this.sessionTimer);
+        // Đổi mật khẩu thành công - dừng idle timer và xóa state, chuyển về trang đăng nhập
+        this.idleTimeout.stop();
         this.passwordResetState.clear();
         this.successMessage.set('Đổi mật khẩu thành công! Đang chuyển hướng...');
         setTimeout(() => {

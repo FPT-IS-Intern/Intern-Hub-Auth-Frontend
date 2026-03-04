@@ -6,6 +6,7 @@ import { PopUpInfoComponent } from '@goat-bravos/intern-hub-layout';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { PasswordResetStateService } from '../../services/password-reset-state.service';
+import { IdleTimeoutService } from '../../services/idle-timeout.service';
 import { firstValueFrom } from 'rxjs';
 
 @Component({
@@ -21,6 +22,7 @@ export class OtpInputComponent implements OnInit, OnDestroy {
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     readonly passwordResetState = inject(PasswordResetStateService);
+    private readonly idleTimeout = inject(IdleTimeoutService);
 
     otpForm = new FormArray(Array(6).fill(0).map(() => new FormControl('', [Validators.required])));
     countdown = signal(59);
@@ -30,7 +32,8 @@ export class OtpInputComponent implements OnInit, OnDestroy {
     popup = signal({
         show: false,
         title: '',
-        content: ''
+        content: '',
+        type: '' as 'max_attempts' | 'max_resend' | ''
     });
     isCanResend = computed(() => this.countdown() === 0);
 
@@ -124,15 +127,17 @@ export class OtpInputComponent implements OnInit, OnDestroy {
             case 'auth.exception.otp_max_attempts':
                 this.popup.set({
                     show: true,
-                    title: 'Vui lòng liên hệ phòng IT',
-                    content: 'Bạn đã nhập sai OTP quá nhiều lần. Vui lòng liên hệ bộ phận IT để được hỗ trợ.'
+                    title: 'Xác thực thất bại',
+                    content: 'Bạn đã nhập sai OTP quá nhiều lần. Vui lòng bấm gửi lại mã để lấy mã mới.',
+                    type: 'max_attempts'
                 });
                 break;
             case 'auth.exception.otp_max_resend':
                 this.popup.set({
                     show: true,
-                    title: 'Vui lòng liên hệ phòng IT',
-                    content: 'Bạn đã yêu cầu gửi OTP quá nhiều lần. Vui lòng liên hệ bộ phận IT để được hỗ trợ.'
+                    title: 'Xác thực thất bại',
+                    content: 'Bạn đã yêu cầu gửi OTP quá nhiều lần. Vui lòng liên hệ bộ phận IT.',
+                    type: 'max_resend'
                 });
                 break;
             default:
@@ -142,9 +147,12 @@ export class OtpInputComponent implements OnInit, OnDestroy {
     }
 
     closePopup() {
-        this.popup.update(state => ({ ...state, show: false }));
-        // redirect to login page
-        this.router.navigate(['/auth/login']);
+        const type = this.popup().type;
+        this.popup.update(state => ({ ...state, show: false, type: '' }));
+        if (type === 'max_resend') {
+            this.router.navigate(['/auth/login']);
+        }
+        // max_attempts: just close the popup, allow user to resend OTP
     }
 
     onConfirm() {
@@ -157,7 +165,7 @@ export class OtpInputComponent implements OnInit, OnDestroy {
             this.router.navigate(['/auth/forgot-password']);
             return;
         }
-
+        this.idleTimeout.start();
         const initialSeconds = this.passwordResetState.nextResendInSeconds();
         this.startCountdown(initialSeconds > 0 ? initialSeconds : 59);
     }
@@ -194,5 +202,6 @@ export class OtpInputComponent implements OnInit, OnDestroy {
 
     ngOnDestroy() {
         if (this.timer) clearInterval(this.timer);
+        this.idleTimeout.stop();
     }
 }

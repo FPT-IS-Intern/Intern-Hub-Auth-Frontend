@@ -1,4 +1,4 @@
-import { Component, signal, computed, inject, OnInit } from '@angular/core';
+import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
@@ -7,6 +7,7 @@ import { AuthService } from '../../services/auth.service';
 import { PasswordResetStateService } from '../../services/password-reset-state.service';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
 import { InputTextComponent, PopUpInfoComponent } from "@goat-bravos/intern-hub-layout";
+import { IdleTimeoutService } from '../../services/idle-timeout.service';
 
 @Component({
     selector: 'app-forgot-password',
@@ -15,11 +16,12 @@ import { InputTextComponent, PopUpInfoComponent } from "@goat-bravos/intern-hub-
     templateUrl: './forgot-password.component.html',
     styleUrls: ['./forgot-password.component.scss']
 })
-export class ForgotPasswordComponent implements OnInit {
+export class ForgotPasswordComponent implements OnInit, OnDestroy {
     private readonly authService = inject(AuthService);
     private readonly router = inject(Router);
     private readonly route = inject(ActivatedRoute);
     readonly passwordResetState = inject(PasswordResetStateService);
+    private readonly idleTimeout = inject(IdleTimeoutService);
 
     // State quản lý bằng signals
     personalId = signal('');
@@ -55,11 +57,16 @@ export class ForgotPasswordComponent implements OnInit {
     });
 
     ngOnInit() {
+        this.idleTimeout.start();
         // Pre-fill email nếu được chuyển từ trang login
         const prefilledEmail = this.passwordResetState.email();
         if (prefilledEmail) {
             this.email.set(prefilledEmail);
         }
+    }
+
+    ngOnDestroy() {
+        this.idleTimeout.stop();
     }
 
     async handleSubmit() {
