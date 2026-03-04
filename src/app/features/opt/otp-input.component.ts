@@ -155,10 +155,6 @@ export class OtpInputComponent implements OnInit, OnDestroy {
         // max_attempts: just close the popup, allow user to resend OTP
     }
 
-    onConfirm() {
-        this.closePopup();
-    }
-
     ngOnInit() {
         // Kiểm tra requestId, nếu không có thì redirect về trang xác thực
         if (!this.passwordResetState.requestId()) {
