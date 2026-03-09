@@ -12,7 +12,12 @@ import { firstValueFrom } from 'rxjs';
 @Component({
     selector: 'app-otp-input',
     standalone: true,
-    imports: [CommonModule, ReactiveFormsModule, ErrorMessageComponent, PopUpInfoComponent],
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        ErrorMessageComponent,
+        PopUpInfoComponent
+    ],
     templateUrl: './otp-input.component.html',
     styleUrls: ['./otp-input.component.scss']
 })

@@ -299,7 +299,7 @@ export class RegisterPage implements OnInit, OnDestroy {
     const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;
     if (!trimmed) {
       this.errors['fullName'] = 'Họ & tên không được để trống';
-    } else if (trimmed.length > 100) {
+    } else if (trimmed.length >= 100) {
       this.errors['fullName'] = 'Họ & tên không quá 100 ký tự';
     } else if (!nameRegex.test(trimmed)) {
       this.errors['fullName'] = 'Không chứa chữ số và ký tự đặc biệt';
