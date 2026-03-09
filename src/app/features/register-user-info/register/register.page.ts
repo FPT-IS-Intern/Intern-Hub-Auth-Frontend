@@ -294,9 +294,6 @@ export class RegisterPage implements OnInit, OnDestroy {
   }
 
   onFullNameInput(value: string): void {
-    if (value.length > 100) {
-      value = value.substring(0, 100);
-    }
     this.fullName = value;
     const trimmed = value.trim();
     const nameRegex = /^[a-zA-ZÀ-ỹ\s]+$/;

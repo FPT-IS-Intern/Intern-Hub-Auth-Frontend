@@ -150,12 +150,12 @@
     </div>
 
     <div class="button-section step-buttons">
-      <div class="next-btn-wrapper" [class.disabled]="!agreeTerms">
-        <app-button-container class="next-btn" [class.next-btn--disabled]="!agreeTerms"
+      <div class="next-btn-wrapper" [class.disabled]="!isFormValid">
+        <app-button-container class="next-btn" [class.next-btn--disabled]="!isFormValid"
           content="Tiếp theo" width="100%"
-          [backgroundColor]="agreeTerms ? 'var(--brand-500)' : 'var(--neutral-color-200)'"
-          [color]="agreeTerms ? 'var(--neutral-color-10)' : 'var(--neutral-color-400)'"
-          (buttonClick)="agreeTerms && goToStep2()"></app-button-container>
+          [backgroundColor]="isFormValid ? 'var(--brand-500)' : 'var(--neutral-color-200)'"
+          [color]="isFormValid ? 'var(--neutral-color-10)' : 'var(--neutral-color-400)'"
+          (buttonClick)="isFormValid && goToStep2()"></app-button-container>
       </div>
     </div>
   </div>
