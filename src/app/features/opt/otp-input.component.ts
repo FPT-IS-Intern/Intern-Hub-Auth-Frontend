@@ -38,7 +38,7 @@ export class OtpInputComponent implements OnInit, OnDestroy {
         show: false,
         title: '',
         content: '',
-        type: '' as 'max_attempts' | 'max_resend' | 'verify_success' | ''
+        type: '' as 'max_attempts' | 'max_resend' | ''
     });
     isCanResend = computed(() => this.countdown() === 0);
 
@@ -67,12 +67,7 @@ export class OtpInputComponent implements OnInit, OnDestroy {
             }));
 
             if (res.status?.code === 'success') {
-                this.popup.set({
-                    show: true,
-                    title: 'Xác thực mã thành công',
-                    content: 'Bạn đã xác thực OTP thành công.',
-                    type: 'verify_success'
-                });
+                this.router.navigate(['../otp-success'], { relativeTo: this.route });
             } else {
                 this.handleError(res.status?.code, res.status?.message);
             }
@@ -161,9 +156,6 @@ export class OtpInputComponent implements OnInit, OnDestroy {
         if (type === 'max_resend') {
             this.router.navigate(['/auth/login']);
             return;
-        }
-        if (type === 'verify_success') {
-            this.router.navigate(['../change-password'], { relativeTo: this.route });
         }
         // max_attempts: just close the popup, allow user to resend OTP
     }

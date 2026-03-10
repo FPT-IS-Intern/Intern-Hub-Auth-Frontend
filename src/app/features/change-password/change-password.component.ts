@@ -1,9 +1,9 @@
 import { Component, signal, computed, inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { InputTextComponent, PopUpInfoComponent } from '@goat-bravos/intern-hub-layout';
+import { InputTextComponent } from '@goat-bravos/intern-hub-layout';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
 import { AuthService } from '../../services/auth.service';
 import { PasswordResetStateService } from '../../services/password-reset-state.service';
@@ -12,13 +12,14 @@ import { IdleTimeoutService } from '../../services/idle-timeout.service';
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, InputTextComponent, ErrorMessageComponent, PopUpInfoComponent],
+  imports: [CommonModule, FormsModule, InputTextComponent, ErrorMessageComponent],
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss']
 })
 export class ChangePasswordComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   readonly passwordResetState = inject(PasswordResetStateService);
   private readonly idleTimeout = inject(IdleTimeoutService);
 
@@ -26,13 +27,6 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   confirmPassword = signal<string>('');
   isLoading = signal<boolean>(false);
   error = signal<string | null>(null);
-  successMessage = signal<string | null>(null);
-  popup = signal({
-    show: false,
-    title: '',
-    content: '',
-    actionLabel: 'Quay lại đăng nhập'
-  });
   showNewPassword = signal(false);
   showConfirmPassword = signal(false);
 
@@ -42,7 +36,7 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
 
   title = computed(() => {
     switch (this.passwordResetState.reason()) {
-      case 'first-login': return 'Đăng nhập lần đầu';
+      case 'first-login': return 'Đổi mật khẩu mới';
       case 'password-expired': return 'Làm mới mật khẩu';
       default: return 'Đổi mật khẩu';
     }
@@ -106,13 +100,7 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
       if (res.status?.code === 'success') {
         this.idleTimeout.stop();
         this.passwordResetState.clear();
-        this.successMessage.set('Đổi mật khẩu thành công');
-        this.popup.set({
-          show: true,
-          title: 'Đổi mật khẩu thành công',
-          content: 'Mật khẩu của bạn đã được cập nhật thành công.',
-          actionLabel: 'Quay lại đăng nhập'
-        });
+        this.router.navigate(['../change-password-success'], { relativeTo: this.route });
       } else {
         this.handleError(res.status?.code, res.status?.message);
       }
@@ -139,8 +127,4 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
     }
   }
 
-  closeSuccessPopup() {
-    this.popup.update(state => ({ ...state, show: false }));
-    this.router.navigate(['/auth/login']);
-  }
 }

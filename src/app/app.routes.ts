@@ -25,10 +25,24 @@ const buildAuthRoutes = (): Routes => [
       import('./features/opt/otp-input.component').then((m) => m.OtpInputComponent),
   },
   {
+    path: 'otp-success',
+    loadComponent: () =>
+      import('./features/otp-success/otp-success.component').then(
+        (m) => m.OtpSuccessComponent,
+      ),
+  },
+  {
     path: 'change-password',
     loadComponent: () =>
       import('./features/change-password/change-password.component').then(
         (m) => m.ChangePasswordComponent,
+      ),
+  },
+  {
+    path: 'change-password-success',
+    loadComponent: () =>
+      import('./features/change-password-success/change-password-success.component').then(
+        (m) => m.ChangePasswordSuccessComponent,
       ),
   },
 ];
