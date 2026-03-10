@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
-import { InputTextComponent } from '@goat-bravos/intern-hub-layout';
+import { InputTextComponent, PopUpInfoComponent } from '@goat-bravos/intern-hub-layout';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
 import { AuthService } from '../../services/auth.service';
 import { PasswordResetStateService } from '../../services/password-reset-state.service';
@@ -12,7 +12,7 @@ import { IdleTimeoutService } from '../../services/idle-timeout.service';
 @Component({
   selector: 'app-change-password',
   standalone: true,
-  imports: [CommonModule, FormsModule, InputTextComponent, ErrorMessageComponent],
+  imports: [CommonModule, FormsModule, InputTextComponent, ErrorMessageComponent, PopUpInfoComponent],
   templateUrl: './change-password.component.html',
   styleUrls: ['./change-password.component.scss']
 })
@@ -27,6 +27,12 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   isLoading = signal<boolean>(false);
   error = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+  popup = signal({
+    show: false,
+    title: '',
+    content: '',
+    actionLabel: 'Quay lại đăng nhập'
+  });
   showNewPassword = signal(false);
   showConfirmPassword = signal(false);
 
@@ -98,13 +104,15 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
       }));
 
       if (res.status?.code === 'success') {
-        // Đổi mật khẩu thành công - dừng idle timer và xóa state, chuyển về trang đăng nhập
         this.idleTimeout.stop();
         this.passwordResetState.clear();
-        this.successMessage.set('Đổi mật khẩu thành công! Đang chuyển hướng...');
-        setTimeout(() => {
-          this.router.navigate(['/auth/login']);
-        }, 2000);
+        this.successMessage.set('Đổi mật khẩu thành công');
+        this.popup.set({
+          show: true,
+          title: 'Đổi mật khẩu thành công',
+          content: 'Mật khẩu của bạn đã được cập nhật thành công.',
+          actionLabel: 'Quay lại đăng nhập'
+        });
       } else {
         this.handleError(res.status?.code, res.status?.message);
       }
@@ -129,5 +137,10 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
         this.error.set(message || 'Đã có lỗi xảy ra, vui lòng thử lại sau.');
         break;
     }
+  }
+
+  closeSuccessPopup() {
+    this.popup.update(state => ({ ...state, show: false }));
+    this.router.navigate(['/auth/login']);
   }
 }
