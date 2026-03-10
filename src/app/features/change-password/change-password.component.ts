@@ -30,8 +30,32 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
   showNewPassword = signal(false);
   showConfirmPassword = signal(false);
 
+  // Password validation rules
+  hasMinLength = computed(() => this.newPassword().length >= 8);
+  hasMaxLength = computed(() => this.newPassword().length > 0 && this.newPassword().length <= 15);
+  hasRequiredChars = computed(() => {
+    const pass = this.newPassword();
+    const hasUpper = /[A-Z]/.test(pass);
+    const hasLower = /[a-z]/.test(pass);
+    const hasDigit = /[0-9]/.test(pass);
+    const hasSpecial = /[!@#$%^&*()]/.test(pass);
+    return hasUpper && hasLower && hasDigit && hasSpecial;
+  });
+  hasNoAccentsOrSpaces = computed(() => {
+    const pass = this.newPassword();
+    if (pass.length === 0) return false;
+    // No spaces and no Vietnamese diacritics/accented characters
+    const hasSpace = /\s/.test(pass);
+    const hasAccent = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđÀÁẠẢÃÂẦẤẬẨẪĂẰẮẶẲẴÈÉẸẺẼÊỀẾỆỂỄÌÍỊỈĨÒÓỌỎÕÔỒỐỘỔỖƠỜỚỢỞỠÙÚỤỦŨƯỪỨỰỬỮỲÝỴỶỸĐ]/.test(pass);
+    return !hasSpace && !hasAccent;
+  });
+
+  allRulesValid = computed(() =>
+    this.hasMinLength() && this.hasMaxLength() && this.hasRequiredChars() && this.hasNoAccentsOrSpaces()
+  );
+
   isSubmitDisabled = computed(() => {
-    return !this.newPassword() || !this.confirmPassword() || this.isLoading();
+    return !this.newPassword() || !this.confirmPassword() || this.isLoading() || !this.allRulesValid();
   });
 
   title = computed(() => {
@@ -72,13 +96,13 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
     const confirm = this.confirmPassword();
 
     this.error.set(null);
-    if (pass !== confirm) {
-      this.error.set('Mật khẩu xác nhận không trùng khớp.');
+    if (!this.allRulesValid()) {
+      this.error.set('Mật khẩu không đáp ứng yêu cầu.');
       return;
     }
 
-    if (pass.length < 6) {
-      this.error.set('Mật khẩu phải có ít nhất 6 ký tự.');
+    if (pass !== confirm) {
+      this.error.set('Mật khẩu xác nhận không trùng khớp.');
       return;
     }
 
