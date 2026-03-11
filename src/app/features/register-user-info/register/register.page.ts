@@ -269,6 +269,16 @@ export class RegisterPage implements OnInit, OnDestroy {
 
   readonly EMAIL_MAX_LENGTH = 254;
 
+  readonly VALID_PHONE_PREFIXES = [
+    '086', '096', '097', '098', '032', '033', '034', '035', '036', '037', '038', '039',
+    '088', '091', '094', '083', '084', '085', '081', '082',
+    '089', '090', '093', '070', '079', '077', '076', '078',
+    '092', '056', '058',
+    '099', '059',
+    '087',
+    '055'
+  ];
+
   onEmailInput(value: string): void {
     if (value.length > this.EMAIL_MAX_LENGTH) {
       value = value.substring(0, this.EMAIL_MAX_LENGTH);
@@ -347,10 +357,21 @@ export class RegisterPage implements OnInit, OnDestroy {
     this.phoneNumber = value;
     if (!value) {
       this.errors['phoneNumber'] = 'Số điện thoại không được để trống';
-    } else if (/^0\d{9}$/.test(value)) {
-      delete this.errors['phoneNumber'];
+    } else if (value.length >= 3) {
+      const prefix = value.substring(0, 3);
+      if (!this.VALID_PHONE_PREFIXES.includes(prefix)) {
+        this.errors['phoneNumber'] = 'Số điện thoại không thuộc nhà mạng nào của Việt Nam';
+      } else if (!/^0\d{9}$/.test(value)) {
+        this.errors['phoneNumber'] = 'Số điện thoại phải có đúng 10 số và bắt đầu bằng 0';
+      } else {
+        delete this.errors['phoneNumber'];
+      }
     } else {
-      this.errors['phoneNumber'] = 'Số điện thoại phải có đúng 10 số và bắt đầu bằng 0';
+      if (!value.startsWith('0')) {
+        this.errors['phoneNumber'] = 'Số điện thoại phải bắt đầu bằng 0';
+      } else {
+        this.errors['phoneNumber'] = 'Số điện thoại phải có đúng 10 số và bắt đầu bằng 0';
+      }
     }
   }
 
@@ -687,6 +708,8 @@ export class RegisterPage implements OnInit, OnDestroy {
     // Số điện thoại: đúng 10 số bắt đầu bằng 0
     if (!this.phoneNumber.trim()) {
       this.errors['phoneNumber'] = 'Số điện thoại không được để trống';
+    } else if (this.phoneNumber.length >= 3 && !this.VALID_PHONE_PREFIXES.includes(this.phoneNumber.substring(0, 3))) {
+      this.errors['phoneNumber'] = 'Số điện thoại không thuộc nhà mạng nào của Việt Nam';
     } else if (!/^0\d{9}$/.test(this.phoneNumber)) {
       this.errors['phoneNumber'] = 'Số điện thoại phải có đúng 10 số và bắt đầu bằng 0';
     }
