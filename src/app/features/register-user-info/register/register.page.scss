@@ -63,11 +63,6 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-
-  app-date-picker ::ng-deep input {
-    cursor: pointer;
-    caret-color: transparent;
-  }
 }
 
 .select-field {

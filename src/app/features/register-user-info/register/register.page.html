@@ -41,11 +41,11 @@
         <div class="date-picker-field">
           <span class="date-picker-label">Ngày sinh <span class="required-star">*</span></span>
           <app-date-picker
+            #birthDatePicker
             placeholder="DD/MM/YYYY"
+            format="dd/MM/yyyy"
             [size]="'default'"
             [(ngModel)]="birthDate"
-            (keydown)="preventDateInput($event)"
-            (paste)="$event.preventDefault()"
             (dateChange)="onBirthDateChange($event)">
           </app-date-picker>
         </div>

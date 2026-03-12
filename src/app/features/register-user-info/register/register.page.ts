@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 
@@ -33,10 +33,14 @@ import { RegisterUserRequest } from '../../../models/register.model';
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.scss'],
 })
-export class RegisterPage implements OnInit, OnDestroy {
+export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   private readonly registerUserService = inject(RegisterUserService);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
+  private readonly el = inject(ElementRef);
+
+  @ViewChild('birthDatePicker', { read: ElementRef }) birthDatePickerRef!: ElementRef;
+  private birthDateInputListener: (() => void) | null = null;
 
   positions: PositionResponse[] = [];
   private inactivityTimer: ReturnType<typeof setTimeout> | null = null;
@@ -47,8 +51,41 @@ export class RegisterPage implements OnInit, OnDestroy {
     this.startInactivityTimer();
   }
 
+  ngAfterViewInit(): void {
+    this.attachBirthDateInputListener();
+  }
+
   ngOnDestroy(): void {
     this.clearInactivityTimer();
+    this.detachBirthDateInputListener();
+  }
+
+  private attachBirthDateInputListener(): void {
+    const pickerEl = this.birthDatePickerRef?.nativeElement;
+    if (!pickerEl) return;
+    const input = pickerEl.querySelector('input') as HTMLInputElement;
+    if (!input) return;
+    const handler = () => this.onBirthDateTyping(input.value);
+    input.addEventListener('input', handler);
+    this.birthDateInputListener = () => input.removeEventListener('input', handler);
+  }
+
+  private detachBirthDateInputListener(): void {
+    this.birthDateInputListener?.();
+    this.birthDateInputListener = null;
+  }
+
+  private onBirthDateTyping(value: string): void {
+    const dateRegex = /^(0[1-9]|[12]\d|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
+    if (!dateRegex.test(value)) return;
+
+    const [day, month, year] = value.split('/').map(Number);
+    const parsed = new Date(year, month - 1, day);
+    if (parsed.getDate() !== day || parsed.getMonth() !== month - 1 || parsed.getFullYear() !== year) return;
+
+    this.birthDate = parsed;
+    this.onBirthDateChange(parsed);
+    this.changeDetectorRef.detectChanges();
   }
 
   private startInactivityTimer(): void {
