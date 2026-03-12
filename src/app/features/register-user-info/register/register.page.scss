@@ -271,6 +271,15 @@
   margin: 0;
 }
 
+.success-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--neutral-600, #6b7280);
+  text-align: center;
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+
 .success-button {
   margin-top: 8px;
 }

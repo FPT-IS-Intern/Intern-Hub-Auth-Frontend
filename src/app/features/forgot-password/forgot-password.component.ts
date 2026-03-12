@@ -123,7 +123,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
     private handleError(code?: string, message?: string) {
         switch (code) {
             case 'auth.exception.identity_mismatch':
-                this.error.set('Thông tin xác thực không khớp. Hãy kiểm tra lại.');
+                this.error.set('Sai thông tin Email tài khoản hoặc CCCD/CMND');
                 break;
             case 'auth.exception.request_not_found':
                 this.error.set('Yêu cầu không tồn tại. Hãy kiểm tra lại.');
@@ -132,7 +132,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
                 this.popup.set({
                     show: true,
                     title: 'Vui lòng liên hệ phòng IT',
-                    content: 'Bạn đã gửi mã xác thực quá nhiều lần. Vui lòng liên hệ bộ phận IT để được hỗ trợ.'
+                    content: 'Bạn đã yêu cầu gửi mã xác thực quá nhiều lần, vui lòng liên hệ bộ phận IT hoặc thử lại sau 24h'
                 });
                 break;
             default:
@@ -143,6 +143,7 @@ export class ForgotPasswordComponent implements OnInit, OnDestroy {
 
     closePopup() {
         this.popup.update(state => ({ ...state, show: false }));
+        this.router.navigate(['/auth/login']);
     }
 
     onConfirm() {

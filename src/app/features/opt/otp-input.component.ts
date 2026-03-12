@@ -120,19 +120,19 @@ export class OtpInputComponent implements OnInit, OnDestroy {
     private handleError(code?: string, message?: string) {
         switch (code) {
             case 'auth.exception.otp_expired':
-                this.error.set('OTP không chính xác hoặc đã hết hạn');
+                this.error.set('Mã kích hoạt không chính xác hoặc đã hết hạn');
                 break;
             case 'auth.exception.otp_invalid':
-                this.error.set('OTP không chính xác hoặc đã hết hạn');
+                this.error.set('Mã kích hoạt không chính xác hoặc đã hết hạn');
                 break;
             case 'auth.exception.otp_resend_too_soon':
-                this.error.set('Vui lòng đợi trước khi gửi lại OTP.');
+                this.error.set('Vui lòng đợi trước khi gửi lại mã kích hoạt.');
                 break;
             case 'auth.exception.otp_max_attempts':
                 this.popup.set({
                     show: true,
                     title: 'Xác thực thất bại',
-                    content: 'Bạn đã nhập sai OTP quá nhiều lần. Vui lòng bấm gửi lại mã để lấy mã mới.',
+                    content: 'Bạn đã nhập sai mã xác thực quá nhiều lần, hãy quay lại và bấm Gửi lại mã kích hoạt để lấy mã mới.',
                     type: 'max_attempts'
                 });
                 break;
@@ -140,7 +140,7 @@ export class OtpInputComponent implements OnInit, OnDestroy {
                 this.popup.set({
                     show: true,
                     title: 'Xác thực thất bại',
-                    content: 'Bạn đã yêu cầu gửi OTP quá nhiều lần. Vui lòng liên hệ bộ phận IT.',
+                    content: 'Bạn đã yêu cầu gửi mã xác thực quá nhiều lần, vui lòng liên hệ bộ phận IT hoặc thử lại sau 24h',
                     type: 'max_resend'
                 });
                 break;

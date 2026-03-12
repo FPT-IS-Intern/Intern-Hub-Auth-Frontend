@@ -6,13 +6,13 @@ import { firstValueFrom } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { PasswordResetStateService } from '../../services/password-reset-state.service';
 import { ErrorMessageComponent } from '../components/error-message/error-message.component';
-import { InputTextComponent } from "@goat-bravos/intern-hub-layout";
+import { InputTextComponent, PopUpInfoComponent } from "@goat-bravos/intern-hub-layout";
 import { MobileWarningComponent } from '../components/mobile-warning/mobile-warning.component';
 
 @Component({
     selector: 'app-login-form',
     standalone: true,
-    imports: [CommonModule, RouterLink, ErrorMessageComponent, InputTextComponent, MobileWarningComponent],
+    imports: [CommonModule, RouterLink, ErrorMessageComponent, InputTextComponent, MobileWarningComponent, PopUpInfoComponent],
     templateUrl: './login-form.component.html',
     styleUrls: ['./login-form.component.scss']
 })
@@ -27,6 +27,12 @@ export class LoginFormComponent {
     error = signal<string | null>(null);
     isLoading = signal(false);
     showPassword = signal(false);
+    failedAttempts = signal(0);
+    popup = signal({
+        show: false,
+        title: '',
+        content: ''
+    });
 
     // Logic kiểm tra nút bấm
     checkInputRequired = computed(() => this.username().trim() === '' || this.password().trim() === '');
@@ -76,7 +82,31 @@ export class LoginFormComponent {
             return;
         }
 
-        this.error.set(message || 'Sai mật khẩu hoặc tên đăng nhập');
+        if (code === 'auth.exception.account_locked' || message?.toLowerCase().includes('locked')) {
+            this.popup.set({
+                show: true,
+                title: 'Đăng nhập thất bại',
+                content: 'Tài khoản của bạn đã bị khóa do đăng nhập sai quá nhiều lần. Vui lòng đặt lại mật khẩu.'
+            });
+            return;
+        }
+
+        this.failedAttempts.update(v => v + 1);
+        const attempts = this.failedAttempts();
+        if (attempts <= 1) {
+            this.error.set('Sai mật khẩu hoặc tên đăng nhập');
+        } else {
+            this.error.set(`Sai mật khẩu lần ${attempts}/5, nếu sai quá 5 lần tài khoản sẽ bị khóa`);
+        }
+    }
+
+    closePopup() {
+        this.popup.update(state => ({ ...state, show: false }));
+    }
+
+    onPopupAction() {
+        this.closePopup();
+        this.router.navigate(['/auth/forgot-password']);
     }
 
     togglePassword() {

@@ -576,7 +576,7 @@ export class RegisterPage implements OnInit, OnDestroy {
     this.registerUserService.registerUser(payload, this.avatarFile, this.cvFile).subscribe({
       next: () => {
         this.isLoading = false;
-        this.successMessage = 'Đăng ký thành công! Vui lòng chờ admin phê duyệt.';
+        this.successMessage = 'Thông tin của bạn đã được gửi đến admin, vui lòng chờ xét duyệt và nhận thông báo từ admin qua mail';
         this.currentStep = 3;
         this.changeDetectorRef.detectChanges();
       },
