@@ -27,7 +27,6 @@ export class LoginFormComponent {
     error = signal<string | null>(null);
     isLoading = signal(false);
     showPassword = signal(false);
-    failedAttempts = signal(0);
     popup = signal({
         show: false,
         title: '',
@@ -56,18 +55,26 @@ export class LoginFormComponent {
                 localStorage.setItem('userId', res.data.userId);
                 this.router.navigate(['/homePage']);
             } else {
-                this.handleLoginError(res.status?.code, res.status?.message);
+                this.handleLoginError(
+                    res.status?.code,
+                    res.status?.message,
+                    this.extractAttemptInfo(res)
+                );
             }
         } catch (err: any) {
             const code = err?.error?.status?.code;
             const message = err?.error?.status?.message || err?.message || 'Lỗi kết nối server';
-            this.handleLoginError(code, message);
+            this.handleLoginError(code, message, this.extractAttemptInfo(err?.error));
         } finally {
             this.isLoading.set(false);
         }
     }
 
-    private handleLoginError(code?: string, message?: string) {
+    private handleLoginError(
+        code?: string,
+        message?: string,
+        attemptInfo?: { maxAttempt?: number; attempt?: number }
+    ) {
         if (code === 'auth.exception.first_login_required') {
             this.passwordResetState.setReason('first-login');
             this.passwordResetState.setEmail(this.username());
@@ -82,7 +89,11 @@ export class LoginFormComponent {
             return;
         }
 
-        if (code === 'auth.exception.account_locked' || message?.toLowerCase().includes('locked')) {
+        const attempt = attemptInfo?.attempt;
+        const maxAttempt = attemptInfo?.maxAttempt;
+        const isExceededMaxAttempt = !!attempt && !!maxAttempt && attempt > maxAttempt;
+
+        if (code === 'auth.exception.account_locked' || message?.toLowerCase().includes('locked') || isExceededMaxAttempt) {
             this.popup.set({
                 show: true,
                 title: 'Đăng nhập thất bại',
@@ -91,13 +102,24 @@ export class LoginFormComponent {
             return;
         }
 
-        this.failedAttempts.update(v => v + 1);
-        const attempts = this.failedAttempts();
-        if (attempts <= 1) {
-            this.error.set('Sai mật khẩu hoặc tên đăng nhập');
-        } else {
-            this.error.set(`Sai mật khẩu lần ${attempts}/5, nếu sai quá 5 lần tài khoản sẽ bị khóa`);
+        if (attempt && maxAttempt) {
+            this.error.set(
+                `Sai mật khẩu lần ${attempt}/${maxAttempt}, nếu sai quá ${maxAttempt} lần tài khoản sẽ bị khóa`
+            );
+            return;
         }
+
+        this.error.set('Sai mật khẩu hoặc tên đăng nhập');
+    }
+
+    private extractAttemptInfo(payload: any): { maxAttempt?: number; attempt?: number } {
+        const rawMaxAttempt = Number(payload?.data?.maxAttempt);
+        const rawAttempt = Number(payload?.data?.attempt);
+
+        const maxAttempt = Number.isFinite(rawMaxAttempt) && rawMaxAttempt > 0 ? rawMaxAttempt : undefined;
+        const attempt = Number.isFinite(rawAttempt) && rawAttempt > 0 ? rawAttempt : undefined;
+
+        return { maxAttempt, attempt };
     }
 
     closePopup() {
