@@ -60,7 +60,7 @@ export class ChangePasswordComponent implements OnInit, OnDestroy {
 
   title = computed(() => {
     switch (this.passwordResetState.reason()) {
-      case 'first-login': return 'Đổi mật khẩu mới';
+      case 'first-login': return 'Đổi mật khẩu';
       case 'password-expired': return 'Làm mới mật khẩu';
       default: return 'Đổi mật khẩu';
     }

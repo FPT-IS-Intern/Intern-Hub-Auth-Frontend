@@ -92,6 +92,7 @@ export class LoginFormComponent {
         const attempt = attemptInfo?.attempt;
         const maxAttempt = attemptInfo?.maxAttempt;
         const isExceededMaxAttempt = !!attempt && !!maxAttempt && attempt > maxAttempt;
+        const shouldShowAttemptWarning = !!attempt && !!maxAttempt && attempt >= 2 && attempt <= maxAttempt;
 
         if (code === 'auth.exception.account_locked' || message?.toLowerCase().includes('locked') || isExceededMaxAttempt) {
             this.popup.set({
@@ -102,7 +103,7 @@ export class LoginFormComponent {
             return;
         }
 
-        if (attempt && maxAttempt) {
+        if (shouldShowAttemptWarning) {
             this.error.set(
                 `Sai mật khẩu lần ${attempt}/${maxAttempt}, nếu sai quá ${maxAttempt} lần tài khoản sẽ bị khóa`
             );

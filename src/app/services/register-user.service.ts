@@ -15,7 +15,7 @@ export interface PositionResponse {
   providedIn: 'root',
 })
 export class RegisterUserService {
-  private readonly baseUrl = `${getBaseUrl()}/hrm/users`;
+  private readonly baseUrl = `http://localhost:8080/hrm/users`;
 
   constructor(private readonly httpClient: HttpClient) {}
 
