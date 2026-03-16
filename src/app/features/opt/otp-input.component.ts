@@ -132,7 +132,7 @@ export class OtpInputComponent implements OnInit, OnDestroy {
                 this.popup.set({
                     show: true,
                     title: 'Xác thực thất bại',
-                    content: 'Bạn đã nhập sai mã xác thực quá nhiều lần, hãy quay lại và bấm Gửi lại mã kích hoạt để lấy mã mới.',
+                    content: 'Bạn đã nhập sai OTP quá nhiều lần. Vui lòng bấm gửi lại mã để lấy mã mới.',
                     type: 'max_attempts'
                 });
                 break;
