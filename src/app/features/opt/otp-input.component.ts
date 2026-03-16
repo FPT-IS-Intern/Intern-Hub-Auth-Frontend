@@ -188,6 +188,25 @@ export class OtpInputComponent implements OnInit, OnDestroy {
         }
     }
 
+    onPaste(event: ClipboardEvent, index: number) {
+        event.preventDefault();
+
+        const pastedText = event.clipboardData?.getData('text') ?? '';
+        const digits = pastedText.replace(/\D/g, '');
+        if (!digits) return;
+
+        const maxLength = this.otpForm.length;
+        const startIndex = digits.length >= maxLength ? 0 : index;
+        const values = digits.slice(0, maxLength - startIndex).split('');
+
+        values.forEach((digit, offset) => {
+            this.otpForm.at(startIndex + offset).setValue(digit);
+        });
+
+        const nextFocusIndex = Math.min(startIndex + values.length, maxLength - 1);
+        setTimeout(() => document.getElementById(`otp-${nextFocusIndex}`)?.focus(), 10);
+    }
+
     startCountdown(seconds: number = 59) {
         this.countdown.set(seconds);
         if (this.timer) clearInterval(this.timer);
