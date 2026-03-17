@@ -40,7 +40,7 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   private readonly el = inject(ElementRef);
   private readonly AVATAR_MAX_FILE_SIZE = 2 * 1024 * 1024;
   private readonly AVATAR_SOURCE_MAX_FILE_SIZE = 10 * 1024 * 1024;
-  private readonly AVATAR_TARGET_COMPRESSED_SIZE = 1024 * 1024;
+  private readonly AVATAR_TARGET_COMPRESSED_SIZE = 500 * 1024;
 
   @ViewChild('birthDatePicker', { read: ElementRef }) birthDatePickerRef!: ElementRef;
   private birthDateInputListener: (() => void) | null = null;
@@ -198,7 +198,7 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   private async compressAvatarImage(file: File): Promise<File> {
     const image = await this.loadImageFromFile(file);
     const outputMimeType = 'image/jpeg';
-    const maxDimension = 1280;
+    const maxDimension = 600;
 
     let width = image.width;
     let height = image.height;
