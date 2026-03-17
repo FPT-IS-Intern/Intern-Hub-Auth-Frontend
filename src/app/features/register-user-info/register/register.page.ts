@@ -38,6 +38,9 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly router = inject(Router);
   private readonly el = inject(ElementRef);
+  private readonly AVATAR_MAX_FILE_SIZE = 2 * 1024 * 1024;
+  private readonly AVATAR_SOURCE_MAX_FILE_SIZE = 10 * 1024 * 1024;
+  private readonly AVATAR_TARGET_COMPRESSED_SIZE = 1024 * 1024;
 
   @ViewChild('birthDatePicker', { read: ElementRef }) birthDatePickerRef!: ElementRef;
   private birthDateInputListener: (() => void) | null = null;
@@ -58,6 +61,7 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.clearInactivityTimer();
     this.detachBirthDateInputListener();
+    this.revokeAvatarPreviewUrl();
   }
 
   private attachBirthDateInputListener(): void {
@@ -141,28 +145,140 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     return this.positionCode.toLowerCase().includes('intern');
   }
 
-  onAvatarChange(file: AvatarUploadedFile | null): void {
+  async onAvatarChange(file: AvatarUploadedFile | null): Promise<void> {
     if (!file?.file) {
-      this.avatarFile = null;
-      this.avatarPreviewUrl = null;
+      this.clearAvatarSelection();
       return;
     }
+
     const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
     if (!allowedTypes.includes(file.file.type)) {
       this.errors['avatar'] = 'Sai định dạng (chỉ nhận .png, .jpg).';
-      this.avatarFile = null;
-      this.avatarPreviewUrl = null;
+      this.clearAvatarSelection();
       return;
     }
-    if (file.file.size > 2 * 1024 * 1024) {
-      this.errors['avatar'] = 'File vượt quá 2MB';
-      this.avatarFile = null;
-      this.avatarPreviewUrl = null;
+
+    if (file.file.size > this.AVATAR_SOURCE_MAX_FILE_SIZE) {
+      this.errors['avatar'] = 'File gốc vượt quá 10MB';
+      this.clearAvatarSelection();
       return;
     }
-    this.avatarFile = file.file;
-    this.avatarPreviewUrl = file.previewUrl || null;
-    delete this.errors['avatar'];
+
+    try {
+      const compressedAvatar = await this.compressAvatarImage(file.file);
+      if (compressedAvatar.size > this.AVATAR_MAX_FILE_SIZE) {
+        this.errors['avatar'] = 'File vượt quá 2MB';
+        this.clearAvatarSelection();
+        return;
+      }
+
+      this.revokeAvatarPreviewUrl();
+      this.avatarFile = compressedAvatar;
+      this.avatarPreviewUrl = URL.createObjectURL(compressedAvatar);
+      delete this.errors['avatar'];
+    } catch {
+      this.errors['avatar'] = 'Không thể xử lý ảnh. Vui lòng chọn ảnh khác.';
+      this.clearAvatarSelection();
+      return;
+    }
+  }
+
+  private clearAvatarSelection(): void {
+    this.revokeAvatarPreviewUrl();
+    this.avatarFile = null;
+    this.avatarPreviewUrl = null;
+  }
+
+  private revokeAvatarPreviewUrl(): void {
+    if (this.avatarPreviewUrl?.startsWith('blob:')) {
+      URL.revokeObjectURL(this.avatarPreviewUrl);
+    }
+  }
+
+  private async compressAvatarImage(file: File): Promise<File> {
+    const image = await this.loadImageFromFile(file);
+    const outputMimeType = 'image/jpeg';
+    const maxDimension = 1280;
+
+    let width = image.width;
+    let height = image.height;
+    const largestDimension = Math.max(width, height);
+    if (largestDimension > maxDimension) {
+      const ratio = maxDimension / largestDimension;
+      width = Math.max(1, Math.round(width * ratio));
+      height = Math.max(1, Math.round(height * ratio));
+    }
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    if (!context) {
+      throw new Error('Canvas context is not available');
+    }
+
+    let bestBlob: Blob | null = null;
+    for (let attempt = 0; attempt < 5; attempt += 1) {
+      canvas.width = width;
+      canvas.height = height;
+      context.clearRect(0, 0, width, height);
+      context.drawImage(image, 0, 0, width, height);
+
+      let quality = 0.9;
+      for (let qualityStep = 0; qualityStep < 6; qualityStep += 1) {
+        const blob = await this.canvasToBlob(canvas, outputMimeType, quality);
+        if (!bestBlob || blob.size < bestBlob.size) {
+          bestBlob = blob;
+        }
+        if (blob.size <= this.AVATAR_TARGET_COMPRESSED_SIZE) {
+          return this.createAvatarFile(blob, file.name);
+        }
+        quality -= 0.1;
+      }
+
+      width = Math.max(320, Math.round(width * 0.85));
+      height = Math.max(320, Math.round(height * 0.85));
+    }
+
+    if (!bestBlob) {
+      throw new Error('Unable to compress image');
+    }
+
+    return this.createAvatarFile(bestBlob, file.name);
+  }
+
+  private createAvatarFile(blob: Blob, originalName: string): File {
+    const normalizedName = originalName.replace(/\.[^.]+$/, '');
+    return new File([blob], `${normalizedName}.jpg`, {
+      type: blob.type,
+      lastModified: Date.now(),
+    });
+  }
+
+  private async canvasToBlob(canvas: HTMLCanvasElement, mimeType: string, quality: number): Promise<Blob> {
+    return new Promise<Blob>((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Canvas toBlob failed'));
+          return;
+        }
+        resolve(blob);
+      }, mimeType, quality);
+    });
+  }
+
+  private async loadImageFromFile(file: File): Promise<HTMLImageElement> {
+    const objectUrl = URL.createObjectURL(file);
+    return new Promise<HTMLImageElement>((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(image);
+      };
+      image.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Invalid image file'));
+      };
+      image.src = objectUrl;
+    });
   }
 
   onCvChange(file: AvatarUploadedFile | null): void {
