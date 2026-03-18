@@ -40,7 +40,7 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   private readonly el = inject(ElementRef);
   private readonly AVATAR_MAX_FILE_SIZE = 2 * 1024 * 1024;
   private readonly AVATAR_SOURCE_MAX_FILE_SIZE = 10 * 1024 * 1024;
-  private readonly AVATAR_TARGET_COMPRESSED_SIZE = 200 * 1024;
+  private readonly AVATAR_TARGET_COMPRESSED_SIZE = 100 * 1024;
 
   @ViewChild('birthDatePicker', { read: ElementRef }) birthDatePickerRef!: ElementRef;
   private birthDateInputListener: (() => void) | null = null;
@@ -120,14 +120,11 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   fullName = '';
   idNumber = '';
   birthDate: Date | null = null;
-  birthDateStr: string = '';
   address = '';
   phoneNumber = '';
   positionCode = '';
   internshipStartDate: Date | null = null;
   internshipEndDate: Date | null = null;
-  internshipStartDateStr = '';
-  internshipEndDateStr = '';
 
   avatarFile: File | null = null;
   cvFile: File | null = null;
@@ -221,8 +218,8 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     }
     context.drawImage(image, 0, 0, width, height);
 
-    const mimetypes = ['image/webp', 'image/jpeg'];
-    const qualities = [0.8, 0.6, 0.4, 0.2];
+    const mimetypes = ['image/webp'];
+    const qualities = [0.75, 0.5, 0.3]; // Reduced slightly for better compression
 
     let bestBlob: Blob | null = null;
 
@@ -232,7 +229,7 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
 
         // If the browser doesn't support the requested mimeType, it might return a different one
         // (usually image/png). In that case, we should skip it if it's not what we wanted.
-        if (blob.type !== mimeType && mimeType === 'image/webp') {
+        if (blob.type !== mimeType) {
           continue;
         }
 
@@ -256,10 +253,10 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private createAvatarFile(blob: Blob, originalName: string): File {
-    const extension = blob.type.split('/')[1] || 'jpg';
+    const extension = 'webp';
     const normalizedName = originalName.replace(/\.[^.]+$/, '');
     return new File([blob], `${normalizedName}.${extension}`, {
-      type: blob.type,
+      type: 'image/webp',
       lastModified: Date.now(),
     });
   }
@@ -328,78 +325,6 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     event.preventDefault();
   }
 
-  /** Auto-format: chèn '/' sau ngày (2 ký tự) và tháng (5 ký tự) */
-  autoFormatDate(event: Event): string {
-    const input = event.target as HTMLInputElement;
-    const cursorPos = input.selectionStart || 0;
-    let digits = input.value.replace(/[^0-9]/g, '');
-
-    if (digits.length > 8) {
-      digits = digits.substring(0, 8);
-    }
-
-    let formatted = '';
-    if (digits.length > 0) {
-      formatted = digits.substring(0, Math.min(2, digits.length));
-    }
-    if (digits.length > 2) {
-      formatted += '/' + digits.substring(2, Math.min(4, digits.length));
-    }
-    if (digits.length > 4) {
-      formatted += '/' + digits.substring(4, 8);
-    }
-
-    input.value = formatted;
-
-    // Adjust cursor position after auto-formatting
-    const newPos = formatted.length;
-    setTimeout(() => input.setSelectionRange(newPos, newPos));
-
-    return formatted;
-  }
-
-  onBirthDateAutoFormat(event: Event): void {
-    const formatted = this.autoFormatDate(event);
-    this.birthDateStr = formatted;
-    this.onBirthDateInput(formatted);
-  }
-
-  onInternStartDateAutoFormat(event: Event): void {
-    const formatted = this.autoFormatDate(event);
-    this.internshipStartDateStr = formatted;
-    this.parseDateStr(formatted, 'internshipStartDate', 'internshipStartDate');
-  }
-
-  onInternEndDateAutoFormat(event: Event): void {
-    const formatted = this.autoFormatDate(event);
-    this.internshipEndDateStr = formatted;
-    this.parseDateStr(formatted, 'internshipEndDate', 'internshipEndDate');
-    // Re-validate end > start
-    if (this.internshipEndDate && this.internshipStartDate && this.internshipEndDate <= this.internshipStartDate) {
-      this.errors['internshipEndDate'] = 'Ngày kết thúc phải sau ngày bắt đầu';
-    }
-  }
-
-  private parseDateStr(value: string, dateField: 'internshipStartDate' | 'internshipEndDate', errorKey: string): void {
-    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
-    if (!dateRegex.test(value)) {
-      if (value.length > 0) {
-        this.errors[errorKey] = 'Định dạng phải là DD/MM/YYYY';
-      }
-      this[dateField] = null;
-      return;
-    }
-    const [day, month, year] = value.split('/').map(Number);
-    const parsed = new Date(year, month - 1, day);
-    if (parsed.getDate() !== day || parsed.getMonth() !== month - 1) {
-      this.errors[errorKey] = 'Ngày không hợp lệ';
-      this[dateField] = null;
-      return;
-    }
-    this[dateField] = parsed;
-    delete this.errors[errorKey];
-  }
-
   onlyNumber(event: KeyboardEvent): void {
     const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
     if (allowedKeys.includes(event.key)) return;
@@ -407,30 +332,6 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       event.preventDefault();
     }
   }
-
-  // --- HANDLER PASTE CHO INPUT SỐ VÀ NGÀY ---
-  onIdNumberPaste(event: ClipboardEvent): void {
-    const pasted = event.clipboardData?.getData('text') || '';
-    if (/\D/.test(pasted)) {
-      event.preventDefault();
-      this.errors['idNumber'] = 'Sai định dạng CCCD/CMND';
-    }
-  }
-  onPhoneNumberPaste(event: ClipboardEvent): void {
-    const pasted = event.clipboardData?.getData('text') || '';
-    if (!/^[0-9]+$/.test(pasted)) {
-      event.preventDefault();
-      this.errors['phoneNumber'] = 'Số điện thoại phải có đúng 10 số và bắt đầu bằng 0';
-    }
-  }
-  onBirthDatePaste(event: ClipboardEvent): void {
-    const pasted = event.clipboardData?.getData('text') || '';
-    if (!/^[0-9/]*$/.test(pasted)) {
-      event.preventDefault();
-      this.errors['birthDate'] = 'Chỉ được nhập số và dấu /';
-    }
-  }
-
   readonly EMAIL_MAX_LENGTH = 254;
 
   readonly VALID_PHONE_PREFIXES = [
@@ -462,9 +363,6 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
     delete this.errors['email'];
-  }
-  onEmailBlur(): void {
-    this.onEmailInput(this.email);
   }
 
   onFullNameInput(value: string): void {
@@ -538,49 +436,6 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       }
     }
   }
-
-  onPhoneKeydown(event: KeyboardEvent): void {
-    const allowedKeys = ['Backspace', 'Delete', 'ArrowLeft', 'ArrowRight', 'Tab'];
-    if (allowedKeys.includes(event.key)) return;
-    if (!/^[0-9]$/.test(event.key)) {
-      event.preventDefault();
-    }
-  }
-
-  onBirthDateInput(value: string): void {
-    this.birthDateStr = value;
-    if (!/^[0-9/]*$/.test(value)) {
-      this.errors['birthDate'] = 'Chỉ được nhập số và dấu /';
-      this.birthDate = null;
-      return;
-    }
-    const dateRegex = /^(0[1-9]|[12][0-9]|3[01])\/(0[1-9]|1[0-2])\/\d{4}$/;
-    if (!dateRegex.test(value)) {
-      this.errors['birthDate'] = 'Định dạng phải là DD/MM/YYYY';
-      this.birthDate = null;
-      return;
-    }
-    const [day, month, year] = value.split('/').map(Number);
-    const inputDate = new Date(year, month - 1, day);
-    const today = new Date();
-    if (inputDate >= today) {
-      this.errors['birthDate'] = 'Ngày sinh phải nhỏ hơn ngày hiện tại';
-      this.birthDate = null;
-      return;
-    }
-    const age = today.getFullYear() - inputDate.getFullYear();
-    const monthDiff = today.getMonth() - inputDate.getMonth();
-    const dayDiff = today.getDate() - inputDate.getDate();
-    const actualAge = monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? age - 1 : age;
-    if (actualAge < 16) {
-      this.errors['birthDate'] = 'Phải đủ độ tuổi lao động/thực tập (>=16 tuổi)';
-      this.birthDate = null;
-      return;
-    }
-    this.birthDate = inputDate;
-    delete this.errors['birthDate'];
-  }
-
   onAddressBlur(): void {
     if (this.address) {
       this.address = this.address
@@ -683,12 +538,6 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     const yyyy = date.getFullYear();
     return `${dd}/${mm}/${yyyy}`;
   }
-
-  get maxBirthDate(): Date {
-    const today = new Date();
-    return new Date(today.getFullYear() - 16, today.getMonth(), today.getDate());
-  }
-
   get isFormValid(): boolean {
     if (Object.keys(this.errors).length > 0) return false;
     if (!this.email || !this.fullName || !this.idNumber || !this.birthDate) return false;
