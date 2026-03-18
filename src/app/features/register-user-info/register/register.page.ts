@@ -40,7 +40,7 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   private readonly el = inject(ElementRef);
   private readonly AVATAR_MAX_FILE_SIZE = 2 * 1024 * 1024;
   private readonly AVATAR_SOURCE_MAX_FILE_SIZE = 10 * 1024 * 1024;
-  private readonly AVATAR_TARGET_COMPRESSED_SIZE = 500 * 1024;
+  private readonly AVATAR_TARGET_COMPRESSED_SIZE = 200 * 1024;
 
   @ViewChild('birthDatePicker', { read: ElementRef }) birthDatePickerRef!: ElementRef;
   private birthDateInputListener: (() => void) | null = null;
@@ -196,9 +196,12 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private async compressAvatarImage(file: File): Promise<File> {
+    if (file.size <= this.AVATAR_TARGET_COMPRESSED_SIZE) {
+      return file;
+    }
+
     const image = await this.loadImageFromFile(file);
-    const outputMimeType = 'image/jpeg';
-    const maxDimension = 600;
+    const maxDimension = 256;
 
     let width = image.width;
     let height = image.height;
@@ -210,44 +213,52 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     }
 
     const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
     const context = canvas.getContext('2d');
     if (!context) {
       throw new Error('Canvas context is not available');
     }
+    context.drawImage(image, 0, 0, width, height);
+
+    const mimetypes = ['image/webp', 'image/jpeg'];
+    const qualities = [0.8, 0.6, 0.4, 0.2];
 
     let bestBlob: Blob | null = null;
-    for (let attempt = 0; attempt < 5; attempt += 1) {
-      canvas.width = width;
-      canvas.height = height;
-      context.clearRect(0, 0, width, height);
-      context.drawImage(image, 0, 0, width, height);
 
-      let quality = 0.9;
-      for (let qualityStep = 0; qualityStep < 6; qualityStep += 1) {
-        const blob = await this.canvasToBlob(canvas, outputMimeType, quality);
+    for (const mimeType of mimetypes) {
+      for (const quality of qualities) {
+        const blob = await this.canvasToBlob(canvas, mimeType, quality);
+
+        // If the browser doesn't support the requested mimeType, it might return a different one
+        // (usually image/png). In that case, we should skip it if it's not what we wanted.
+        if (blob.type !== mimeType && mimeType === 'image/webp') {
+          continue;
+        }
+
         if (!bestBlob || blob.size < bestBlob.size) {
           bestBlob = blob;
         }
+
         if (blob.size <= this.AVATAR_TARGET_COMPRESSED_SIZE) {
-          return this.createAvatarFile(blob, file.name);
+          if (blob.size < file.size) {
+            return this.createAvatarFile(blob, file.name);
+          }
         }
-        quality -= 0.1;
       }
-
-      width = Math.max(320, Math.round(width * 0.85));
-      height = Math.max(320, Math.round(height * 0.85));
     }
 
-    if (!bestBlob) {
-      throw new Error('Unable to compress image');
+    if (bestBlob && bestBlob.size < file.size) {
+      return this.createAvatarFile(bestBlob, file.name);
     }
 
-    return this.createAvatarFile(bestBlob, file.name);
+    return file;
   }
 
   private createAvatarFile(blob: Blob, originalName: string): File {
+    const extension = blob.type.split('/')[1] || 'jpg';
     const normalizedName = originalName.replace(/\.[^.]+$/, '');
-    return new File([blob], `${normalizedName}.jpg`, {
+    return new File([blob], `${normalizedName}.${extension}`, {
       type: blob.type,
       lastModified: Date.now(),
     });
