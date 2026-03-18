@@ -1,7 +1,6 @@
 import { Component, signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { firstValueFrom } from 'rxjs';
 
 import { AuthService } from '../../services/auth.service';
 import { PasswordResetStateService } from '../../services/password-reset-state.service';
@@ -43,10 +42,10 @@ export class LoginFormComponent {
         this.isLoading.set(true);
 
         try {
-            const res = await firstValueFrom(this.authService.login({
+            const res = await this.authService.login({
                 username: this.username(),
                 password: this.password()
-            }));
+            });
 
             if (res.status?.code === 'success' && res.data) {
                 // Login thành công - lưu token và redirect
