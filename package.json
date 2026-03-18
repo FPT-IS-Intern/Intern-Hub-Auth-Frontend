@@ -34,6 +34,7 @@
     "@goat-bravos/intern-hub-layout": "^4.0.6",
     "@goat-bravos/shared-lib-client": "^1.0.1",
     "@softarc/native-federation-node": "^3.3.4",
+    "browser-image-compression": "^2.0.2",
     "dynamic-ds": "1.0.13",
     "es-module-shims": "^1.5.12",
     "ng-zorro-antd": "^21.1.0",

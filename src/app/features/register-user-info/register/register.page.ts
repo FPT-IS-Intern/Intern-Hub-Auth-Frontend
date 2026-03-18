@@ -1,7 +1,16 @@
-import { CommonModule } from '@angular/common';
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import {CommonModule} from '@angular/common';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
+import {FormsModule} from '@angular/forms';
+import {Router} from '@angular/router';
 
 
 import {
@@ -11,11 +20,12 @@ import {
   DatePickerComponent,
   InputTextComponent,
 } from '@goat-bravos/intern-hub-layout';
-import { ProcessStep, ProcessStepComponent } from '../process-step/process-step.component';
-import { TermsPopupComponent } from '../terms-popup.component';
-import { RegisterUserService } from '../../../services/register-user.service';
-import { PositionResponse } from "../../../services/register-user.service";
-import { RegisterUserRequest } from '../../../models/register.model';
+import {ProcessStep, ProcessStepComponent} from '../process-step/process-step.component';
+import {TermsPopupComponent} from '../terms-popup.component';
+import {RegisterUserService} from '../../../services/register-user.service';
+import {PositionResponse} from "../../../services/register-user.service";
+import {RegisterUserRequest} from '../../../models/register.model';
+import imageCompression from 'browser-image-compression';
 
 @Component({
   standalone: true,
@@ -40,9 +50,9 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   private readonly el = inject(ElementRef);
   private readonly AVATAR_MAX_FILE_SIZE = 2 * 1024 * 1024;
   private readonly AVATAR_SOURCE_MAX_FILE_SIZE = 10 * 1024 * 1024;
-  private readonly AVATAR_TARGET_COMPRESSED_SIZE = 100 * 1024;
+  private readonly AVATAR_TARGET_COMPRESSED_SIZE = 80 * 1024;
 
-  @ViewChild('birthDatePicker', { read: ElementRef }) birthDatePickerRef!: ElementRef;
+  @ViewChild('birthDatePicker', {read: ElementRef}) birthDatePickerRef!: ElementRef;
   private birthDateInputListener: (() => void) | null = null;
 
   positions: PositionResponse[] = [];
@@ -110,9 +120,9 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
 
 
   steps: ProcessStep[] = [
-    { stepNumber: 1, label: 'Thông tin cá nhân' },
-    { stepNumber: 2, label: 'Xem lại thông tin' },
-    { stepNumber: 3, label: 'Hoàn thành' },
+    {stepNumber: 1, label: 'Thông tin cá nhân'},
+    {stepNumber: 2, label: 'Xem lại thông tin'},
+    {stepNumber: 3, label: 'Hoàn thành'},
   ];
   currentStep = 1;
 
@@ -193,63 +203,35 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
   }
 
   private async compressAvatarImage(file: File): Promise<File> {
+    // skip file nhỏ
     if (file.size <= this.AVATAR_TARGET_COMPRESSED_SIZE) {
       return file;
     }
 
-    const image = await this.loadImageFromFile(file);
-    const maxDimension = 256;
+    const options = {
+      maxSizeMB: this.AVATAR_TARGET_COMPRESSED_SIZE / (1024 * 1024),
+      maxWidthOrHeight: 256,
+      useWebWorker: true,
+      fileType: 'image/webp',
+      initialQuality: 0.75,
+    };
 
-    let width = image.width;
-    let height = image.height;
-    const largestDimension = Math.max(width, height);
-    if (largestDimension > maxDimension) {
-      const ratio = maxDimension / largestDimension;
-      width = Math.max(1, Math.round(width * ratio));
-      height = Math.max(1, Math.round(height * ratio));
-    }
+    try {
+      const compressedBlob = await imageCompression(file, options);
 
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    const context = canvas.getContext('2d');
-    if (!context) {
-      throw new Error('Canvas context is not available');
-    }
-    context.drawImage(image, 0, 0, width, height);
+      console.log('Original:', file.size);
+      console.log('Compressed:', compressedBlob.size);
 
-    const mimetypes = ['image/webp'];
-    const qualities = [0.75, 0.5, 0.3]; // Reduced slightly for better compression
-
-    let bestBlob: Blob | null = null;
-
-    for (const mimeType of mimetypes) {
-      for (const quality of qualities) {
-        const blob = await this.canvasToBlob(canvas, mimeType, quality);
-
-        // If the browser doesn't support the requested mimeType, it might return a different one
-        // (usually image/png). In that case, we should skip it if it's not what we wanted.
-        if (blob.type !== mimeType) {
-          continue;
-        }
-
-        if (!bestBlob || blob.size < bestBlob.size) {
-          bestBlob = blob;
-        }
-
-        if (blob.size <= this.AVATAR_TARGET_COMPRESSED_SIZE) {
-          if (blob.size < file.size) {
-            return this.createAvatarFile(blob, file.name);
-          }
-        }
+      //fallback tránh phình
+      if (compressedBlob.size >= file.size) {
+        return file;
       }
-    }
 
-    if (bestBlob && bestBlob.size < file.size) {
-      return this.createAvatarFile(bestBlob, file.name);
+      return this.createAvatarFile(compressedBlob, file.name);
+    } catch (error) {
+      console.error('Lỗi khi nén ảnh:', error);
+      return file;
     }
-
-    return file;
   }
 
   private createAvatarFile(blob: Blob, originalName: string): File {
@@ -261,33 +243,6 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
-  private async canvasToBlob(canvas: HTMLCanvasElement, mimeType: string, quality: number): Promise<Blob> {
-    return new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (!blob) {
-          reject(new Error('Canvas toBlob failed'));
-          return;
-        }
-        resolve(blob);
-      }, mimeType, quality);
-    });
-  }
-
-  private async loadImageFromFile(file: File): Promise<HTMLImageElement> {
-    const objectUrl = URL.createObjectURL(file);
-    return new Promise<HTMLImageElement>((resolve, reject) => {
-      const image = new Image();
-      image.onload = () => {
-        URL.revokeObjectURL(objectUrl);
-        resolve(image);
-      };
-      image.onerror = () => {
-        URL.revokeObjectURL(objectUrl);
-        reject(new Error('Invalid image file'));
-      };
-      image.src = objectUrl;
-    });
-  }
 
   onCvChange(file: AvatarUploadedFile | null): void {
     if (!file?.file) {
@@ -332,6 +287,7 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       event.preventDefault();
     }
   }
+
   readonly EMAIL_MAX_LENGTH = 254;
 
   readonly VALID_PHONE_PREFIXES = [
@@ -436,6 +392,7 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       }
     }
   }
+
   onAddressBlur(): void {
     if (this.address) {
       this.address = this.address
@@ -512,12 +469,14 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       delete this.errors['birthDate'];
     }
   }
+
   onInternshipStartDateChange(date: Date | null): void {
     this.internshipStartDate = date;
     if (date) {
       delete this.errors['internshipStartDate'];
     }
   }
+
   onInternshipEndDateChange(date: Date | null): void {
     this.internshipEndDate = date;
     if (date) {
@@ -538,6 +497,7 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     const yyyy = date.getFullYear();
     return `${dd}/${mm}/${yyyy}`;
   }
+
   get isFormValid(): boolean {
     if (Object.keys(this.errors).length > 0) return false;
     if (!this.email || !this.fullName || !this.idNumber || !this.birthDate) return false;
@@ -554,12 +514,14 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
     }
     this.clearInactivityTimer();
     this.currentStep = 2;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({top: 0, behavior: 'smooth'});
   }
+
   goBackToStep1(): void {
     this.currentStep = 1;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    window.scrollTo({top: 0, behavior: 'smooth'});
   }
+
   confirmAndSubmit(): void {
     if (this.isLoading) {
       return;
@@ -611,12 +573,12 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       next: (response) => {
         if (!response?.data || response.data.length === 0) {
           this.positions = [
-            { name: 'BA', positionId: 2 },
-            { name: 'TES', positionId: 9 },
-            { name: 'PM', positionId: 4 },
-            { name: 'INTERN DEV', positionId: 5 },
-            { name: 'DEV', positionId: 10 },
-            { name: 'DESIGNER', positionId: 1 }
+            {name: 'BA', positionId: 2},
+            {name: 'TES', positionId: 9},
+            {name: 'PM', positionId: 4},
+            {name: 'INTERN DEV', positionId: 5},
+            {name: 'DEV', positionId: 10},
+            {name: 'DESIGNER', positionId: 1}
           ];
         } else {
           this.positions = response.data;
@@ -625,12 +587,12 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       },
       error: () => {
         this.positions = [
-          { name: 'BA', positionId: 2 },
-          { name: 'TES', positionId: 9 },
-          { name: 'PM', positionId: 4 },
-          { name: 'INTERN DEV', positionId: 5 },
-          { name: 'DEV', positionId: 10 },
-          { name: 'DESIGNER', positionId: 1 }
+          {name: 'BA', positionId: 2},
+          {name: 'TES', positionId: 9},
+          {name: 'PM', positionId: 4},
+          {name: 'INTERN DEV', positionId: 5},
+          {name: 'DEV', positionId: 10},
+          {name: 'DESIGNER', positionId: 1}
         ];
       }
     });
