@@ -15,7 +15,7 @@ export interface PositionResponse {
   providedIn: 'root',
 })
 export class RegisterUserService {
-  private readonly baseUrl = `http://localhost:8080/hrm/users`;
+  private readonly baseUrl = `https://internhub-v2.bbtech.io.vn/api/hrm/users`;
 
   constructor(private readonly httpClient: HttpClient) {}
 
