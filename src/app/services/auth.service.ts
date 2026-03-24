@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
 import {
   LoginRequest,
   LoginResponse,
@@ -20,16 +20,21 @@ import { getBaseUrl } from '../core/config/app-config';
 export class AuthService {
   constructor(private readonly httpClient: HttpClient) {}
 
-  login(data: LoginRequest): Observable<ResponseApi<LoginResponse>> {
+  async login(data: LoginRequest): Promise<ResponseApi<LoginResponse>> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       Accept: '*/*',
       'X-Device-ID': this.getDeviceId(),
     });
 
-    return this.httpClient.post<ResponseApi<LoginResponse>>(`${getBaseUrl()}/auth/login`, data, {
-      headers,
-    });
+    const encryptedPassword = await this.encryptPassword(data.password);
+
+    return firstValueFrom(
+      this.httpClient.post<ResponseApi<LoginResponse>>(`${getBaseUrl()}/auth/login`, {
+        username: data.username,
+        password: encryptedPassword,
+      }, { headers })
+    );
   }
 
   verifyIdentity(data: VerifyIdentityRequest): Observable<ResponseApi<VerifyIdentityResponse>> {
@@ -60,6 +65,35 @@ export class AuthService {
     );
   }
 
+  private async encryptPassword(plainPassword: string): Promise<string> {
+    const publicKeyBase64 = await this.fetchPublicKey();
+
+    const binaryDer = Uint8Array.from(atob(publicKeyBase64), c => c.charCodeAt(0));
+
+    const cryptoKey = await crypto.subtle.importKey(
+      'spki',
+      binaryDer.buffer,
+      {
+        name: 'RSA-OAEP',
+        hash: 'SHA-256',
+      },
+      false,
+      ['encrypt'],
+    );
+
+    const encoded = new TextEncoder().encode(plainPassword);
+    const cipherBuffer = await crypto.subtle.encrypt({ name: 'RSA-OAEP' }, cryptoKey, encoded);
+
+    return btoa(String.fromCharCode(...new Uint8Array(cipherBuffer)));
+  }
+
+  private async fetchPublicKey(): Promise<string> {
+    const res = await firstValueFrom(
+      this.httpClient.get<ResponseApi<string>>(`${getBaseUrl()}/auth/public-key`)
+    );
+    return res.data!;
+  }
+
   private getDeviceId(): string {
     let deviceId = localStorage.getItem('X-Device-ID');
     if (!deviceId) {
@@ -68,4 +102,5 @@ export class AuthService {
     }
     return deviceId;
   }
+
 }
