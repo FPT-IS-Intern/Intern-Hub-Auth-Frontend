@@ -91,7 +91,7 @@ export class LoginFormComponent {
         const attempt = attemptInfo?.attempt;
         const maxAttempt = attemptInfo?.maxAttempt;
         const isExceededMaxAttempt = !!attempt && !!maxAttempt && attempt > maxAttempt;
-        const shouldShowAttemptWarning = !!attempt && !!maxAttempt && attempt >= 2 && attempt <= maxAttempt;
+        const shouldShowAttemptWarning = !!attempt && !!maxAttempt && attempt >= 1 && attempt <= maxAttempt;
 
         if (code === 'auth.exception.account_locked' || message?.toLowerCase().includes('locked') || isExceededMaxAttempt) {
             this.popup.set({
