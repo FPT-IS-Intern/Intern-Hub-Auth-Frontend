@@ -85,7 +85,7 @@
 
       <div class="form-group">
         <app-avatar-upload-button label="Ảnh đại diện" buttonText="Tải ảnh lên"
-          acceptFormats="image/png,image/jpeg,image/jpg" helperText="Định dạng .png, .jpeg, .jpg" [required]="true"
+          acceptFormats="image/*" helperText="Định dạng image" [required]="true"
           (fileChange)="onAvatarChange($event)"></app-avatar-upload-button>
         @if (errors['avatar']) {
         <span class="error-message">{{ errors['avatar'] }}</span>

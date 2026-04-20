@@ -158,13 +158,6 @@ export class RegisterPage implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const allowedTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-    if (!allowedTypes.includes(file.file.type)) {
-      this.errors['avatar'] = 'Sai định dạng (chỉ nhận .png, .jpg).';
-      this.clearAvatarSelection();
-      return;
-    }
-
     if (file.file.size > this.AVATAR_SOURCE_MAX_FILE_SIZE) {
       this.errors['avatar'] = 'File gốc vượt quá 10MB';
       this.clearAvatarSelection();
