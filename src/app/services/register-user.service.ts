@@ -15,10 +15,11 @@ export interface PositionResponse {
   providedIn: 'root',
 })
 export class RegisterUserService {
-  private readonly baseUrl = `http://localhost:8765/api/hrm/users`;
-  
-
   constructor(private readonly httpClient: HttpClient) {}
+
+  private getBaseUrl(): string {
+    return `${getBaseUrl()}/hrm/users`;
+  }
 
   registerUser(
     userInfo: RegisterUserRequest,
@@ -35,7 +36,7 @@ export class RegisterUserService {
     formData.append('cvFile', cvFile, cvFile.name);
 
     return this.httpClient
-      .post<ResponseApi<RegisteredUserResponse>>(`${this.baseUrl}/register`, formData)
+      .post<ResponseApi<RegisteredUserResponse>>(`${this.getBaseUrl()}/register`, formData)
       .pipe(catchError(this.handleError));
   }
 
@@ -63,10 +64,10 @@ export class RegisterUserService {
 
 
   getPositions(): Observable<ResponseApi<PositionResponse[]>> {
-    return this.httpClient.get<ResponseApi<PositionResponse[]>>(`${this.baseUrl}/positions`).pipe(
+    return this.httpClient.get<ResponseApi<PositionResponse[]>>(`${this.getBaseUrl()}/positions`).pipe(
       catchError((error) => {
         console.warn('Retrying positions with fallback URL...');
-        return this.httpClient.get<ResponseApi<PositionResponse[]>>(`${this.baseUrl}/positions`).pipe(
+        return this.httpClient.get<ResponseApi<PositionResponse[]>>(`${this.getBaseUrl()}/positions`).pipe(
           catchError(() => this.handleError(error))
         );
       })
